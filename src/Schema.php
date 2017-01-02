@@ -1,0 +1,327 @@
+<?php //-->
+/**
+ * This file is part of the Cradle PHP Kitchen Sink Faucet Project.
+ * (c) 2016-2018 Openovate Labs
+ *
+ * Copyright and license information can be found at LICENSE.txt
+ * distributed with this package.
+ */
+
+namespace Cradle\Sink\Faucet;
+
+/**
+ * Schema
+ *
+ * @vendor   Cradle
+ * @package  Faucet
+ * @author   Christian Blanquera <cblanquera@openovate.com>
+ * @standard PSR-2
+ */
+class Schema
+{
+
+    public function __construct($root, $name)
+    {
+        $this->root = $root;
+        $this->name = $name;
+    }
+
+    public function getData()
+    {
+        if(!file_exists($this->root . '/' . $this->name . '.php')) {
+            return false;
+        }
+
+        $data = include $this->root . '/' . $this->name . '.php';
+        $data['name'] = $this->name;
+
+        if(!isset($data['relations']) || !is_array($data['relations'])) {
+            $data['relations'] = [];
+        }
+
+        if(!isset($data['fields']) || !is_array($data['fields'])) {
+            $data['fields'] = [];
+        }
+
+        foreach($data['fields'] as $name => $field) {
+            $data['fields'][$name] = $this->normalizeField($name, $field);
+            $this->addFlags($data['fields'][$name], $data);
+        }
+
+        foreach($data['relations'] as $name => $relation) {
+            //because there are no schemas for this
+            if($name === 'app') {
+                $data['json'][] = 'app_permissions';
+                continue;
+            }
+
+            if($name === 'auth') {
+                $data['json'][] = 'auth_permissions';
+                continue;
+            }
+
+            if($name === 'session') {
+                $data['json'][] = 'session_permissions';
+                continue;
+            }
+
+            $schema = new self($this->root, $name);
+            $schema = $schema->getData();
+
+            if(!$schema) {
+                continue;
+            }
+
+            if(!isset($relation['primary']) && isset($schema['primary'])) {
+                $data['relations'][$name]['primary'] = $schema['primary'];
+            }
+
+            foreach($schema['fields'] as $name => $field) {
+                if(isset($field['sql']['type']) && $field['sql']['type'] === 'json') {
+                    $data['json'][] = $name;
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    protected function addFlags($field, &$data)
+    {
+        if(isset($field['sql']['unique']) && $field['sql']['unique']) {
+            $data['unique'][] = $field['name'];
+        }
+
+        if(isset($field['sql']['type']) && $field['sql']['type'] === 'json') {
+            $data['json'][] = $field['name'];
+        }
+
+        if(isset($field['sql']['searchable']) && $field['sql']['searchable']) {
+            $data['searchable'][] = $field['name'];
+        }
+
+        if(isset($field['sql']['sortable']) && $field['sql']['sortable']) {
+            $data['sortable'][] = $field['name'];
+        }
+
+        if(isset($field['sql']['filterable']) && $field['sql']['filterable']) {
+            $data['filterable'][] = $field['name'];
+        }
+
+        if(isset($field['form']['type'])
+            && (
+                $field['form']['type'] === 'file'
+                || $field['form']['type'] === 'image'
+            )
+        )
+        {
+            $data['has_file'] = true;
+        } else if(isset($field['form']['inline_type'])
+            && (
+                $field['form']['inline_type'] === 'image-field'
+                || $field['form']['inline_type'] === 'images-field'
+            )
+        )
+        {
+            $data['has_file'] = true;
+        }
+    }
+
+    protected function normalizeField($name, $field)
+    {
+        $field['name'] = $name;
+
+        //auto set the encoding
+        if(isset($field['sql']['type']) && !isset($field['sql']['encoding'])) {
+            switch($field['sql']['type']) {
+                case 'datetime':
+                case 'date':
+                case 'time':
+                case 'json':
+                case 'bool':
+                    $field['sql']['encoding'] = $field['sql']['type'];
+                    break;
+                case 'int':
+                    if(isset($field['sql']['length']) && $field['sql']['length'] === 1) {
+                        $field['sql']['encoding'] = 'small';
+                    }
+                    break;
+            }
+        }
+
+        if(isset($field['form']['type'])) {
+            switch($field['form']['type']) {
+                case 'image':
+                    $field['form']['type'] = 'file';
+                    $field['form']['attributes']['accept'] = 'image/*';
+                case 'file':
+                case 'hidden': //sometimes used for JS
+                case 'color':
+                case 'date':
+                case 'email':
+                case 'month':
+                case 'number':
+                case 'password':
+                case 'range':
+                case 'search':
+                case 'tel':
+                case 'text':
+                case 'time':
+                case 'url':
+                case 'week':
+                    $field['form']['attributes']['type'] = $field['form']['type'];
+                    $field['form']['type'] = 'input';
+                    break;
+            }
+
+            //add bootstrap class
+            if(in_array(
+                $field['form']['type'],
+                    [
+                        'input',
+                        'select',
+                        'textarea'
+                    ]
+                )
+            )
+            {
+                if(isset($field['form']['attributes']['class'])) {
+                    $field['form']['attributes']['class'] .= ' form-control';
+                } else {
+                    $field['form']['attributes']['class'] = 'form-control';
+                }
+            }
+
+            //tag
+            if($field['form']['type'] === 'tag-field') {
+                $code = file_get_contents(__DIR__ . '/cli/generate/template/fields/tags.html');
+                $code = str_replace('{NAME}', $field['name'], $code);
+                $field['form']['inline_type'] = $field['form']['type'];
+                $field['form']['type'] = 'inline';
+                $field['form']['code'] = trim($code);
+            }
+
+            //image
+            if($field['form']['type'] === 'image-field') {
+                $code = file_get_contents(__DIR__ . '/cli/generate/template/fields/image.html');
+                $code = str_replace('{NAME}', $field['name'], $code);
+                $field['form']['inline_type'] = $field['form']['type'];
+                $field['form']['type'] = 'inline';
+                $field['form']['code'] = trim($code);
+            }
+
+            //images
+            if($field['form']['type'] === 'images-field') {
+                $code = file_get_contents(__DIR__ . '/cli/generate/template/fields/images.html');
+                $code = str_replace('{NAME}', $field['name'], $code);
+                $field['form']['inline_type'] = $field['form']['type'];
+                $field['form']['type'] = 'inline';
+                $field['form']['code'] = trim($code);
+            }
+
+            //attributes
+            if($field['form']['type'] === 'meta-field') {
+                $code = file_get_contents(__DIR__ . '/cli/generate/template/fields/meta.html');
+                $code = str_replace('{NAME}', $field['name'], $code);
+                $field['form']['inline_type'] = $field['form']['type'];
+                $field['form']['type'] = 'inline';
+                $field['form']['code'] = trim($code);
+            }
+
+            //these are all the possible form types
+            if(!in_array(
+                $field['form']['type'],
+                    [
+                        'input',
+                        'select',
+                        'textarea',
+                        'radio',
+                        'radios',
+                        'checkbox',
+                        'checkboxes',
+                        'button',
+                        'inline'
+                    ]
+                )
+            )
+            {
+                //if not then its inline
+                $field['form']['code'] = $field['form']['type'];
+                $field['form']['type'] = 'inline';
+            }
+        }
+
+        //noop to prevent nested if
+        if(isset($field['list']) && !isset($field['list']['format'])) {
+            $field['list']['format'] = 'noop';
+        }
+
+        //these are all the possible list formats
+        if(isset($field['list']['format']) && !in_array(
+            $field['list']['format'],
+                [
+                    'date',
+                    'length',
+                    'words',
+                    'link',
+                    'image',
+                    'email',
+                    'phone',
+                    'capital',
+                    'implode',
+                    'upper',
+                    'lower',
+                    'noop',
+                    'inline'
+                ]
+            )
+        )
+        {
+            //if not then its inline
+            $field['list']['code'] = $field['list']['format'];
+            $field['list']['format'] = 'inline';
+        }
+
+        //noop to prevent nested if
+        if(isset($field['detail']) && !isset($field['detail']['format'])) {
+            $field['detail']['format'] = 'noop';
+        }
+
+        //these are all the possible detail formats
+        if(isset($field['detail']['format']) && !in_array(
+            $field['detail']['format'],
+                [
+                    'date',
+                    'length',
+                    'words',
+                    'link',
+                    'image',
+                    'email',
+                    'phone',
+                    'capital',
+                    'implode',
+                    'upper',
+                    'lower',
+                    'noop',
+                    'inline'
+                ]
+            )
+        )
+        {
+            //if not then its inline
+            $field['detail']['code'] = $field['list']['format'];
+            $field['detail']['format'] = 'inline';
+        }
+
+        if(isset($field['validation'])) {
+            foreach($field['validation'] as $validation) {
+                if($validation['method'] === 'required') {
+                    $field['required'] = true;
+                    break;
+                }
+            }
+        }
+
+        return $field;
+    }
+}

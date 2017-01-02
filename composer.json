@@ -1,0 +1,28 @@
+{
+    "name": "cradlephp/sink-faucet",
+    "type": "library",
+    "description": "Command line tools for CradlePHP Kitchen Sink",
+    "minimum-stability": "dev",
+    "homepage": "https://cradlephp.github.io/",
+    "keywords": [
+        "generator",
+        "cradle",
+        "cradlephp"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Blanquera",
+            "email": "cblanquera@openovate.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.0",
+		"cradlephp/command-line": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cradle\\Sink\\Faucet\\": "src/"
+        }
+    }
+}
