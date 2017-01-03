@@ -10,7 +10,7 @@
 use Cradle\CommandLine\Index as CommandLine;
 
 /**
- * CLI project starting point
+ * CLI faucet starting point
  *
  * @param Request $request
  * @param Response $response

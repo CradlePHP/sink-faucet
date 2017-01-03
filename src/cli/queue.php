@@ -10,7 +10,7 @@
 use Cradle\CommandLine\Index as CommandLine;
 
 /**
- * CLI queue - bin/cradle project queue auth-verify auth_slug=<email>
+ * CLI queue - bin/cradle faucet queue auth-verify auth_slug=<email>
  *
  * @param Request $request
  * @param Response $response
@@ -20,7 +20,7 @@ use Cradle\CommandLine\Index as CommandLine;
 return function ($request, $response) {
     $data = $request->getStage();
     if (!isset($data[0])) {
-        CommandLine::error('Not enough arguments. Usage: cradle package project queue event data');
+        CommandLine::error('Not enough arguments. Usage: bin/cradle faucet queue event data');
     }
 
     $event = array_shift($data);

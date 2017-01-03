@@ -137,9 +137,9 @@ return function($request, $response) {
             $truncate = CommandLine::input('Try repopulating the database?(n):', 'n');
 
             if($truncate !== 'n') {
-                $this->trigger('project-flush-sql', $request, $response);
+                $this->trigger('faucet-flush-sql', $request, $response);
                 Installer::install($schemaName);
-                $this->trigger('project-populate-sql', $request, $response);
+                $this->trigger('faucet-populate-sql', $request, $response);
             }
         }
 

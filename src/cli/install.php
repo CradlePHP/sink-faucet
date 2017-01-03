@@ -11,7 +11,7 @@ use Cradle\CommandLine\Index as CommandLine;
 use Cradle\Sql\SqlFactory;
 
 /**
- * CLI project installation
+ * CLI faucet installation
  *
  * @param Request $request
  * @param Response $response
@@ -198,7 +198,7 @@ return function ($request, $response) {
     }
 
     //now run the update
-    $this->trigger('project-update', $request, $response);
+    $this->trigger('faucet-update', $request, $response);
 
     //now populate
     $populateSql = false;
@@ -214,7 +214,7 @@ return function ($request, $response) {
     }
 
     if ($populateSql) {
-        $this->trigger('project-populate-sql', $request, $response);
+        $this->trigger('faucet-populate-sql', $request, $response);
     }
 
     if ($this->package('global')->service('elastic-main')) {
@@ -232,9 +232,9 @@ return function ($request, $response) {
         }
 
         if ($populateElastic) {
-            $this->trigger('project-flush-elastic', $request, $response);
-            $this->trigger('project-map-elastic', $request, $response);
-            $this->trigger('project-populate-elastic', $request, $response);
+            $this->trigger('faucet-flush-elastic', $request, $response);
+            $this->trigger('faucet-map-elastic', $request, $response);
+            $this->trigger('faucet-populate-elastic', $request, $response);
         }
     }
 };

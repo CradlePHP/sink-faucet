@@ -18,7 +18,7 @@ use Cradle\CommandLine\Index as CommandLine;
 return function ($request, $response) {
     $data = $request->getStage();
     if (!isset($data[0])) {
-        CommandLine::error('Not enough arguments. Usage: cradle package project connect-to [key]');
+        CommandLine::error('Not enough arguments. Usage: bin/cradle faucet connect-to [key]');
     }
 
     $deploy = cradle('global')->config('deploy');

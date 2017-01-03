@@ -11,7 +11,7 @@ use Cradle\CommandLine\Index as CommandLine;
 use Cradle\Sink\Faucet\Installer;
 
 /**
- * CLI project update
+ * CLI faucet update
  *
  * @param Request $request
  * @param Response $response
