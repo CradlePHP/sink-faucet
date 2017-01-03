@@ -128,27 +128,28 @@ $cradle->on('{{name}}-create', function ($request, $response) {
 
         {{~#when sql.encoding '===' 'token'}}
 
-        $data['{{@key}}'] = md5(uniqid());
+    $data['{{@key}}'] = md5(uniqid());
         {{~/when}}
 
         {{~#when sql.encoding '===' 'created'}}
 
-        $data['{{@key}}'] = date('Y-m-d H:i:s');
+    $data['{{@key}}'] = date('Y-m-d H:i:s');
         {{~/when}}
 
         {{~#when sql.encoding '===' 'uuid'}}
 
-        $data['{{@key}}'] = md5(uniqid());
+    $data['{{@key}}'] = md5(uniqid());
         {{~/when}}
 
         {{~#when sql.encoding '===' 'updated'}}
 
-        $data['{{@key}}'] = date('Y-m-d H:i:s');
+    $data['{{@key}}'] = date('Y-m-d H:i:s');
         {{~/when}}
 
         {{~#when sql.encoding '===' 'inline'}}
 
-        {{sql.code}}
+    {{sql.code_create}}
+    {{sql.code}}
         {{~/when}}
     {{~/each}}
 
@@ -551,7 +552,8 @@ $cradle->on('{{name}}-update', function ($request, $response) {
 
         {{~#when sql.encoding '===' 'inline'}}
 
-        {{sql.code}}
+    {{sql.code_update}}
+    {{sql.code}}
         {{~/when}}
     {{~/each}}
 

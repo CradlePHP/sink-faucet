@@ -117,10 +117,13 @@ namespace Cradle\Sink\Faucet;
  * - required
  * - empty
  * - one
+ * - number
  * - gt
  * - lt
+ * - char_eq
  * - char_gt
  * - char_lt
+ * - word_eq
  * - word_gt
  * - word_lt
  * - regexp
@@ -222,6 +225,10 @@ class Schema
             $data['filterable'][] = $field['name'];
         }
 
+        if(isset($field['field']['default'])) {
+            $data['defaults'][$field['name']] = $field['field']['default'];
+        }
+
         if(isset($field['form']['type'])
             && (
                 $field['form']['type'] === 'file'
@@ -260,6 +267,25 @@ class Schema
                         $field['sql']['encoding'] = 'small';
                     }
                     break;
+            }
+        }
+
+        //default
+        if(isset($field['sql']['default'], $field['form'])) {
+            $field['form']['default'] = $field['sql']['default'];
+        }
+
+        if(isset($field['form']['default'])) {
+            if(is_string($field['form']['default'])) {
+                $field['form']['default'] = '\''.$field['form']['default'].'\'';
+            } else if(is_null($field['form']['default'])) {
+                $field['form']['default'] = 'null';
+            } else if(is_array($field['form']['default']) || is_object($field['form']['default'])) {
+                $field['form']['default'] = var_export($field['form']['default'], true);
+            } else if($field['form']['default'] === true) {
+                $field['form']['default'] = '1';
+            } else if($field['form']['default'] === false) {
+                $field['form']['default'] = '0';
             }
         }
 

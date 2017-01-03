@@ -106,6 +106,10 @@
                                     <img src="\{\{ {{name}}\}\}"{{#if list.parameters.0}} width="{{list.parameters.0}}"{{/if}}{{#if list.parameters.1}} height="{{list.parameters.1}}"{{/if}} />
                                     {{~/when}}
 
+                                    {{~#when list.format '===' 'images'}}
+                                    <img src="\{\{ {{name}}.0.small\}\}"{{#if list.parameters.0}} width="{{list.parameters.0}}"{{/if}}{{#if list.parameters.1}} height="{{list.parameters.1}}"{{/if}} />
+                                    {{~/when}}
+
                                     {{~#when list.format '===' 'email'}}
                                     <a href="mailto:\{\{ {{name}}\}\}">\{\{ {{name}}\}\}</a>
                                     {{~/when}}
@@ -128,6 +132,10 @@
 
                                     {{~#when list.format '===' 'lower'}}
                                     \{\{tolower {{name}}\}\}
+                                    {{~/when}}
+
+                                    {{~#when list.format '===' 'price'}}
+                                    \{\{price {{name}}\}\}
                                     {{~/when}}
 
                                     {{~#when list.format '===' 'noop'}}

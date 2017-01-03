@@ -97,6 +97,12 @@ class Validator
         }
                 {{/when}}
 
+                {{~#when method '===' 'number'}}
+        if (isset($data['{{../@key}}']) && !is_numeric($data['{{../@key}}'])) {
+            $errors['{{../@key}}'] = '{{message}}';
+        }
+                {{/when}}
+
                 {{~#when method '===' 'regexp'}}
         if (isset($data['{{../@key}}']) && !preg_match('{{parameters}}', $data['{{../@key}}'])) {
             $errors['{{../@key}}'] = '{{message}}';
@@ -104,13 +110,28 @@ class Validator
                 {{/when}}
 
                 {{~#when method '===' 'gt'}}
-        if(isset($data['{{../@key}}']) && $data['{{../@key}}'] <= {{parameters}}) {
+        if(isset($data['{{../@key}}'])
+            && is_numeric($data['{{../@key}}'])
+            && $data['{{../@key}}'] <= {{parameters}}
+        )
+        {
             $errors['{{../@key}}'] = '{{message}}';
         }
                 {{/when}}
 
                 {{~#when method '===' 'lt'}}
-        if(isset($data['{{../@key}}']) && $data['{{../@key}}'] >= {{parameters}}) {
+        if(isset(
+            $data['{{../@key}}'])
+            && is_numeric($data['{{../@key}}'])
+            && $data['{{../@key}}'] >= {{parameters}}
+        )
+        {
+            $errors['{{../@key}}'] = '{{message}}';
+        }
+                {{/when}}
+
+                {{~#when method '===' 'char_eq'}}
+        if(isset($data['{{../@key}}']) && strlen($data['{{../@key}}']) != {{parameters}}) {
             $errors['{{../@key}}'] = '{{message}}';
         }
                 {{/when}}
@@ -123,6 +144,12 @@ class Validator
 
                 {{~#when method '===' 'char_lt'}}
         if(isset($data['{{../@key}}']) && strlen($data['{{../@key}}']) >= {{parameters}}) {
+            $errors['{{../@key}}'] = '{{message}}';
+        }
+                {{/when}}
+
+                {{~#when method '===' 'word_eq'}}
+        if(isset($data['{{../@key}}']) && str_word_count($data['{{../@key}}']) != {{parameters}}) {
             $errors['{{../@key}}'] = '{{message}}';
         }
                 {{/when}}

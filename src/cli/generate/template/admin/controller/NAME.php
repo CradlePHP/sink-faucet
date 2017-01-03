@@ -116,9 +116,16 @@ $cradle->get('/admin/{{name}}/create', function($request, $response) {
     $data['cdn_config'] = File::getS3Client($config);
     {{~/if}}
 
-    if($response->isError()) {
+    if ($response->isError()) {
         $response->setFlash($response->getMessage(), 'danger');
         $data['errors'] = $response->getValidation();
+    {{#if defaults~}}
+    //defaults
+    } else if (empty($data['item'])) {
+        {{#each defaults~}}
+        $data['item']['{{@key}}'] = {{this}};
+        {{/each~}}
+    {{/if~}}
     }
 
     //----------------------------//
