@@ -74,32 +74,81 @@ $cradle->on('{{name}}-create', function ($request, $response) {
     }
         {{~/when}}
 
-        {{~#when sql.type '===' 'json'}}
+        {{~#when sql.encoding '===' 'json'}}
 
     if(isset($data['{{@key}}'])) {
         $data['{{@key}}'] = json_encode($data['{{@key}}']);
     }
         {{~/when}}
 
-        {{~#when sql.type '===' 'date'}}
+        {{~#when sql.encoding '===' 'date'}}
 
     if(isset($data['{{@key}}'])) {
         $data['{{@key}}'] = date('Y-m-d', strtotime($data['{{@key}}']));
     }
         {{~/when}}
 
-        {{~#when sql.type '===' 'time'}}
+        {{~#when sql.encoding '===' 'time'}}
 
     if(isset($data['{{@key}}'])) {
         $data['{{@key}}'] = date('H:i:s', strtotime($data['{{@key}}']));
     }
         {{~/when}}
 
-        {{~#when sql.type '===' 'datetime'}}
+        {{~#when sql.encoding '===' 'datetime'}}
 
     if(isset($data['{{@key}}'])) {
         $data['{{@key}}'] = date('Y-m-d H:i:s', strtotime($data['{{@key}}']));
     }
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'md5'}}
+
+    if(isset($data['{{@key}}'])) {
+        $data['{{@key}}'] = md5(strtotime($data['{{@key}}']));
+    }
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'sha1'}}
+
+    if(isset($data['{{@key}}'])) {
+        $data['{{@key}}'] = sha1(strtotime($data['{{@key}}']));
+    }
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'bool'}}
+
+    if(isset($data['{{@key}}'])) {
+        $data['{{@key}}'] = 0;
+        if($data['{{@key}}']) {
+            $data['{{@key}}'] = 1;
+        }
+    }
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'token'}}
+
+        $data['{{@key}}'] = md5(uniqid());
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'created'}}
+
+        $data['{{@key}}'] = date('Y-m-d H:i:s');
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'uuid'}}
+
+        $data['{{@key}}'] = md5(uniqid());
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'updated'}}
+
+        $data['{{@key}}'] = date('Y-m-d H:i:s');
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'inline'}}
+
+        {{sql.code}}
         {{~/when}}
     {{~/each}}
 
@@ -438,32 +487,71 @@ $cradle->on('{{name}}-update', function ($request, $response) {
     }
         {{~/when}}
 
-        {{~#when sql.type '===' 'json'}}
+        {{~#when sql.encoding '===' 'json'}}
 
     if(isset($data['{{@key}}'])) {
         $data['{{@key}}'] = json_encode($data['{{@key}}']);
     }
         {{~/when}}
 
-        {{~#when sql.type '===' 'date'}}
+        {{~#when sql.encoding '===' 'date'}}
 
     if(isset($data['{{@key}}'])) {
         $data['{{@key}}'] = date('Y-m-d', strtotime($data['{{@key}}']));
     }
         {{~/when}}
 
-        {{~#when sql.type '===' 'time'}}
+        {{~#when sql.encoding '===' 'time'}}
 
     if(isset($data['{{@key}}'])) {
         $data['{{@key}}'] = date('H:i:s', strtotime($data['{{@key}}']));
     }
         {{~/when}}
 
-        {{~#when sql.type '===' 'datetime'}}
+        {{~#when sql.encoding '===' 'datetime'}}
 
     if(isset($data['{{@key}}'])) {
         $data['{{@key}}'] = date('Y-m-d H:i:s', strtotime($data['{{@key}}']));
     }
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'md5'}}
+
+    if(isset($data['{{@key}}'])) {
+        $data['{{@key}}'] = md5(strtotime($data['{{@key}}']));
+    }
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'sha1'}}
+
+    if(isset($data['{{@key}}'])) {
+        $data['{{@key}}'] = sha1(strtotime($data['{{@key}}']));
+    }
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'bool'}}
+
+    if(isset($data['{{@key}}'])) {
+        $data['{{@key}}'] = 0;
+        if($data['{{@key}}']) {
+            $data['{{@key}}'] = 1;
+        }
+    }
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'uuid'}}
+
+    $data['{{@key}}'] = md5(uniqid());
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'updated'}}
+
+    $data['{{@key}}'] = date('Y-m-d H:i:s');
+        {{~/when}}
+
+        {{~#when sql.encoding '===' 'inline'}}
+
+        {{sql.code}}
         {{~/when}}
     {{~/each}}
 

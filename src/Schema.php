@@ -12,6 +12,120 @@ namespace Cradle\Sink\Faucet;
 /**
  * Schema
  *
+ * Sample field:
+ * [
+ *      'sql' => [
+ *         'type' => 'varchar',
+ *         'length' => 255,
+ *         'attributes' => 'unsigned',
+ *         'default' => 'Foobar',
+ *         'comment' => 'foobar',
+ *         'required' => true,
+ *         'key' => true,
+ *         'unique' => true,
+ *         'primary' => true,
+ *         'encoding' => false
+ *     ],
+ *     'elastic' => [
+ *         'type' => 'string',
+ *         'fields' => [
+ *             'keyword' => [
+ *                 'type' => 'keyword'
+ *             ]
+ *         ]
+ *     ],
+ *     'form' => [
+ *         'label' => 'Text Example',
+ *         'type' => false,
+ *         'default' => 'foobar',
+ *         'attributes' => [
+ *             'placeholder' => 'Sample Text',
+ *         ],
+ *         'options' => [
+ *             '' => 'Choose one',
+ *             'choice1' => 'Choice 1',
+ *             'choice2' => 'Choice 2',
+ *         ],
+ *         'scripts' => []
+ *     ],
+ *     'list' => [
+ *         'label' => 'Text',
+ *         'searchable' => true,
+ *         'sortable' => true,
+ *         'filterable' => true,
+ *         'format' => length,
+ *         'parameters' => 255
+ *     ],
+ *     'detail' => [
+ *         'label' => 'Text',
+ *         'format' => 'date',
+ *         'parameters' => 'Y-m-d H:i:s'
+ *     ],
+ *     'validation' => [
+ *         [
+ *             'method' => 'required',
+ *             'message' => 'Is required',
+ *             'parameters' => []
+ *         ]
+ *     ],
+ *     'test' => [
+ *         'pass' => 'foo',
+ *         'fail' => 'bar'
+ *     ]
+ * ],
+ *
+ * SQL Encoding Options
+ * - md5
+ * - sha1
+ * - uuid
+ * - token
+ * - datetime
+ * - date
+ * - time
+ * - created
+ * - updated
+ * - json
+ * - bool
+ * - [inline]
+ *
+ * Form Type Options
+ * - input
+ * - select
+ * - textarea
+ * - radio
+ * - radios
+ * - checkbox
+ * - checkboxes
+ * - button
+ * - [inline]
+ *
+ * List and Detail Format Options
+ * - date
+ * - length
+ * - words
+ * - link
+ * - image
+ * - email
+ * - phone
+ * - capital
+ * - implode
+ * - upper
+ * - lower
+ * - [inline]
+ *
+ * Validation Method Options
+ * - required
+ * - empty
+ * - one
+ * - gt
+ * - lt
+ * - char_gt
+ * - char_lt
+ * - word_gt
+ * - word_lt
+ * - regexp
+ * - unique
+ * - [inline]
  * @vendor   Cradle
  * @package  Faucet
  * @author   Christian Blanquera <cblanquera@openovate.com>
