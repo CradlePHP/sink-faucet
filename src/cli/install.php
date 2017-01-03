@@ -176,7 +176,7 @@ return function ($request, $response) {
         }
     }
 
-    if ($continue || $force) {
+    if (empty($exists) || $continue || $force) {
         CommandLine::system('Installing Database...');
 
         $build->query('CREATE DATABASE IF NOT EXISTS `' . $name . '`;');
