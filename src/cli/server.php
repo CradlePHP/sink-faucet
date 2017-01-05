@@ -18,11 +18,19 @@ return function ($request, $response) {
         $port = $request->getStage('p');
     }
 
+    $host = '127.0.0.1';
+
+    if($request->hasStage('host')) {
+        $host = $request->getStage('host');
+    } else if($request->hasStage('h')) {
+        $host = $request->getStage('h');
+    }
+
     //setup the configs
     CommandLine::system('Starting Server...');
-    CommandLine::info('Listening on 127.0.0.1:'.$port);
+    CommandLine::info('Listening on ' . $host . ':'.$port);
     CommandLine::info('Press Ctrl-C to quit.');
 
     $cwd = $request->getServer('PWD');
-    system('php -S 127.0.0.1:' . $port . ' -t ' . $cwd . '/public');
+    system('php -S ' . $host . ':' . $port . ' -t ' . $cwd . '/public');
 };
