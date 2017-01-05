@@ -182,8 +182,13 @@ class Schema
                 continue;
             }
 
-            $schema = new self($this->root, $name);
-            $schema = $schema->getData();
+            //prevent recursion loop
+            if($data['name'] === $name) {
+                $schema = $data;
+            } else {
+                $schema = new self($this->root, $name);
+                $schema = $schema->getData();
+            }
 
             if(!$schema) {
                 continue;
