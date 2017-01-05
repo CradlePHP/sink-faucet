@@ -198,6 +198,10 @@ class Schema
                 $data['relations'][$name]['primary'] = $schema['primary'];
             }
 
+            if($relation['many']) {
+                continue;
+            }
+
             foreach($schema['fields'] as $name => $field) {
                 if(isset($field['sql']['type']) && $field['sql']['type'] === 'json') {
                     $data['json'][] = $name;
