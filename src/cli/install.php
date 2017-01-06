@@ -20,38 +20,6 @@ return function ($request, $response) {
     //whether to ask questions
     $force = $request->hasStage('f') || $request->hasStage('force');
 
-    //setup the configs
-    if(!$request->hasStage('skip-configs')) {
-        CommandLine::system('Setting up config files...');
-        $cwd = $request->getServer('PWD');
-
-        $configs = [
-            'deploy',
-            'services',
-            'settings',
-            'test'
-        ];
-
-        foreach ($configs as $config) {
-            $source = $cwd . '/config/' . $config . '.sample.php';
-            $destination = $cwd . '/config/' . $config . '.php';
-
-            if (!file_exists($source)) {
-                continue;
-            }
-
-            if (file_exists($destination) && !$force) {
-                $answer = CommandLine::input('Overwrite config/' . $config . '.php?(y)', 'y');
-                if ($answer !== 'y') {
-                    CommandLine::system('Skipping...');
-                    continue;
-                }
-            }
-
-            copy($source, $destination);
-        }
-    }
-
     //name
     $name = false;
     if ($request->hasStage(0)) {
@@ -114,127 +82,85 @@ return function ($request, $response) {
         }
     }
 
-    //services
+    //setup the configs
+    $cwd = $request->getServer('PWD');
     if(!$request->hasStage('skip-configs')) {
-        $contents = file_get_contents($cwd . '/config/services.php');
-        $contents = str_replace('dbname=salaaap_v6', 'dbname=' . $name, $contents);
-        $contents = str_replace(':host=127.0.0.1', ':host='.$host, $contents);
-        $contents = str_replace("'root', ''", "'" . $user . "', '" . $pass . "'", $contents);
+        CommandLine::system('Setting up config files...');
 
-        if (!$force) {
-            if (strpos($contents, '<AWS TOKEN>') !== false) {
-                $awsToken = CommandLine::input('What is the AWS S3 token?(enter to skip)', '<AWS TOKEN>');
-                $contents = str_replace('<AWS TOKEN>', $awsToken, $contents);
+
+        $paths = scandir(__DIR__ . '/config', 0);
+        foreach($paths as $path) {
+            if($path === '.' || $path === '..' || substr($path, -4) !== '.php') {
+                continue;
             }
 
-            if (strpos($contents, '<AWS SECRET>') !== false) {
-                $awsSecret = CommandLine::input('What is the AWS S3 secret?(enter to skip)', '<AWS SECRET>');
-                $contents = str_replace('<AWS SECRET>', $awsSecret, $contents);
+            $source = __DIR__ . '/config/' . $path;
+            $destination = $cwd . '/config/' . $path;
+
+            if (file_exists($destination) && !$force) {
+                $answer = CommandLine::input('Overwrite config/' . $config . '.php?(y)', 'y');
+                if ($answer !== 'y') {
+                    CommandLine::system('Skipping...');
+                    continue;
+                }
             }
 
-            if (strpos($contents, '<S3 BUCKET>') !== false) {
-                $awsBucket = CommandLine::input('What is the AWS S3 bucket?(enter to skip)', '<S3 BUCKET>');
-                $contents = str_replace('<S3 BUCKET>', $awsBucket, $contents);
-            }
+            $contents = file_get_contents($source);
+            $contents = str_replace('<DATABASE HOST>', $host, $contents);
+            $contents = str_replace('<DATABASE NAME>', $name, $contents);
+            $contents = str_replace('<DATABASE USER>', $user, $contents);
+            $contents = str_replace('<DATABASE PASS>', $pass, $contents);
 
-            if (strpos($contents, '<EMAIL ADDRESS>') !== false) {
-                $mailAddress = CommandLine::input('What is the notifier email address?(enter to skip)', '<EMAIL ADDRESS>');
-                $contents = str_replace('<EMAIL ADDRESS>', $mailAddress, $contents);
-            }
-
-            if (strpos($contents, '<EMAIL PASSWORD>') !== false) {
-                $mailPassword = CommandLine::input('What is the notifier email password?(enter to skip)', '<EMAIL PASSWORD>');
-                $contents = str_replace('<EMAIL PASSWORD>', $mailAddress, $contents);
-            }
-
-            if (strpos($contents, '<GOOGLE CAPTCHA TOKEN>') !== false) {
-                $captchaToken = CommandLine::input('What is the Google Captcha token?(enter to skip)', '<GOOGLE CAPTCHA TOKEN>');
-                $contents = str_replace('<GOOGLE CAPTCHA TOKEN>', $captchaToken, $contents);
-            }
-
-            if (strpos($contents, '<GOOGLE CAPTCHA SECRET>') !== false) {
-                $captchaSecret = CommandLine::input('What is the Google Captcha secret?(enter to skip)', '<GOOGLE CAPTCHA SECRET>');
-                $contents = str_replace('<GOOGLE CAPTCHA SECRET>', $captchaSecret, $contents);
-            }
-        }
-
-        file_put_contents($cwd . '/config/services.php', $contents);
-    }
-
-    //SQL
-    CommandLine::system('Setting up SQL...');
-
-    //connection
-    $build = SqlFactory::load(new PDO('mysql:host=' . $host, $user, $pass));
-    $exists = $build->query("SHOW DATABASES LIKE '" . $name . "';");
-
-    $continue = false;
-    if (!empty($exists) && !$force) {
-        $answer = CommandLine::input('This will override your existing database. Are you sure?(y)', 'y');
-        if ($answer === 'y') {
-            $continue = true;
+            file_put_contents($destination, $contents);
         }
     }
 
-    if (empty($exists) || $continue || $force) {
-        CommandLine::system('Installing Database...');
+    if(!$request->hasStage('skip-sql')) {
+        //SQL
+        CommandLine::system('Setting up SQL...');
 
-        $build->query('CREATE DATABASE IF NOT EXISTS `' . $name . '`;');
+        //connection
+        $build = SqlFactory::load(new PDO('mysql:host=' . $host, $user, $pass));
+        $exists = $build->query("SHOW DATABASES LIKE '" . $name . "';");
 
-        $database = SqlFactory::load(new PDO('mysql:host=' . $host . ';dbname=' . $name, $user, $pass));
-
-        //drop all tables
-        $tables = $database->getTables();
-        foreach ($tables as $table) {
-            $database->query('DROP TABLE `' . $table . '`;');
-        }
-    }
-
-    $file = cradle('global')->path('config') . '/version.php';
-    //if there's a version file
-    if(file_exists($file)) {
-        //this is an install process so reset the versions
-        file_put_contents($file, '<?php return [];');
-    }
-
-    //now run the update
-    $this->trigger('faucet-update', $request, $response);
-
-    //now populate
-    $populateSql = false;
-    if ($request->hasStage('populate-sql')) {
-        $populateSql = $request->getStage('populate-sql');
-    }
-
-    if ($populateSql === false && !$force) {
-        $answer = CommandLine::input('Do you want to populate the SQL database?(y)', 'y');
-        if ($answer === 'y') {
-            $populateSql = true;
-        }
-    }
-
-    if ($populateSql) {
-        $this->trigger('faucet-populate-sql', $request, $response);
-    }
-
-    if ($this->package('global')->service('elastic-main')) {
-        $populateElastic = false;
-        if ($request->hasStage('populate-elastic')) {
-            $populateElastic = $request->getStage('populate-elastic');
-        }
-
-        if ($populateElastic === false && !$force) {
-            CommandLine::warning('Make sure ElasticSearch service is running or enter (n) for the following question.');
-            $answer = CommandLine::input('Do you want to populate the ElasticSearch Index?(y)', 'y');
+        $continue = false;
+        if (!empty($exists) && !$force) {
+            $answer = CommandLine::input('This will override your existing database. Are you sure?(y)', 'y');
             if ($answer === 'y') {
-                $populateElastic = true;
+                $continue = true;
             }
         }
 
-        if ($populateElastic) {
-            $this->trigger('faucet-flush-elastic', $request, $response);
-            $this->trigger('faucet-map-elastic', $request, $response);
-            $this->trigger('faucet-populate-elastic', $request, $response);
+        if (empty($exists) || $continue || $force) {
+            CommandLine::system('Installing Database...');
+
+            $build->query('CREATE DATABASE IF NOT EXISTS `' . $name . '`;');
+
+            $database = SqlFactory::load(new PDO('mysql:host=' . $host . ';dbname=' . $name, $user, $pass));
+
+            //drop all tables
+            $tables = $database->getTables();
+            foreach ($tables as $table) {
+                $database->query('DROP TABLE `' . $table . '`;');
+            }
         }
     }
+
+    if(!$request->hasStage('skip-versioning')) {
+        $file = cradle('global')->path('config') . '/version.php';
+        //if there's a version file
+        if(file_exists($file)) {
+            //this is an install process so reset the versions
+            file_put_contents($file, '<?php return [];');
+        }
+
+        //now run the update
+        $this->trigger('faucet-update', $request, $response);
+    }
+
+    CommandLine::info('Recommended actions:');
+    CommandLine::info(' - bin/cradle faucet populate-sql');
+    CommandLine::info(' - bin/cradle faucet flush-elastic');
+    CommandLine::info(' - bin/cradle faucet map-elastic');
+    CommandLine::info(' - bin/cradle faucet populate-elastic');
 };
