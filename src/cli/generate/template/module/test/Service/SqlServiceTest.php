@@ -117,11 +117,11 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
     {{~#each relations}}
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::link{{camel @key 1}}
+     * @covers Cradle\Module\{{camel ../name 1}}\Service\SqlService::link{{camel name 1}}
      */
-    public function testLink{{camel @key 1}}()
+    public function testLink{{camel name 1}}()
     {
-        $actual = $this->object->link{{camel @key 1}}(999, 999);
+        $actual = $this->object->link{{camel name 1}}(999, 999);
 
         $this->assertTrue(!empty($actual));
         $this->assertEquals(999, $actual['{{../primary}}']);
@@ -129,11 +129,11 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
     }
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::unlink{{camel @key 1}}
+     * @covers Cradle\Module\{{camel ../name 1}}\Service\SqlService::unlink{{camel name 1}}
      */
-    public function testUnlink{{camel @key 1}}()
+    public function testUnlink{{camel name 1}}()
     {
-        $actual = $this->object->unlink{{camel @key 1}}(999, 999);
+        $actual = $this->object->unlink{{camel name 1}}(999, 999);
 
         $this->assertTrue(!empty($actual));
         $this->assertEquals(999, $actual['{{../primary}}']);
@@ -143,11 +143,11 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
         {{~#if many}}
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::unlink{{camel @key 1}}
+     * @covers Cradle\Module\{{camel ../name 1}}\Service\SqlService::unlink{{camel name 1}}
      */
-    public function testUnlinkAll{{camel @key 1}}()
+    public function testUnlinkAll{{camel name 1}}()
     {
-        $actual = $this->object->unlinkAll{{camel @key 1}}(999);
+        $actual = $this->object->unlinkAll{{camel name 1}}(999);
 
         $this->assertTrue(!empty($actual));
         $this->assertEquals(999, $actual['{{../primary}}']);
