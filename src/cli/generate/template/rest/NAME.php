@@ -59,6 +59,9 @@ $cradle->get('/rest/{{name}}/search', function($request, $response) {
     //we do this to prevent SQL injections
     if(is_array($request->getStage('filter'))) {
         $filterable = [
+        {{~#if active}}
+        '{{active}}',
+        {{~/if}}
         {{~#each filterable}}
             {{~#noop}}
             '{{this}}'{{#unless @last}},{{/unless}}
@@ -67,11 +70,28 @@ $cradle->get('/rest/{{name}}/search', function($request, $response) {
         ];
 
         foreach($request->getStage('filter') as $key => $value) {
-            if(!in_array($key, $sortable)) {
+            if(!in_array($key, $filterable)) {
                 $request->removeStage('filter', $key);
             }
         }
     }
+    {{~else}}
+        {{~#if active}}
+
+    //filter possible filter options
+    //we do this to prevent SQL injections
+    if(is_array($request->getStage('filter'))) {
+        $filterable = [
+            '{{active}}'
+        ];
+
+        foreach($request->getStage('filter') as $key => $value) {
+            if(!in_array($key, $filterable)) {
+                $request->removeStage('filter', $key);
+            }
+        }
+    }
+        {{~/if}}
     {{~/if}}
 
     {{~#if relations.profile}}

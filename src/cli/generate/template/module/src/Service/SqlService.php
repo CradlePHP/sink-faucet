@@ -74,8 +74,8 @@ class SqlService extends AbstractSqlService implements SqlServiceInterface
         {{#if relations}}
             {{~#each relations}}
                 {{~#unless many}}
-        $search->innerJoinUsing('{{../name}}_{{@key}}', '{{../primary}}');
-        $search->innerJoinUsing('{{@key}}', '{{primary}}');
+        $search->innerJoinUsing('{{../name}}_{{name}}', '{{../primary}}');
+        $search->innerJoinUsing('{{name}}', '{{primary}}');
                 {{~/unless}}
             {{~/each}}
         {{/if}}
@@ -184,9 +184,9 @@ class SqlService extends AbstractSqlService implements SqlServiceInterface
         {{#if relations}}
             {{~#each relations}}
                 {{~#unless many}}
-        //join {{@key}}
-        $search->innerJoinUsing('{{../name}}_{{@key}}', '{{../primary}}');
-        $search->innerJoinUsing('{{@key}}', '{{primary}}');
+        //join {{name}}
+        $search->innerJoinUsing('{{../name}}_{{name}}', '{{../primary}}');
+        $search->innerJoinUsing('{{name}}', '{{primary}}');
                 {{~/unless}}
             {{~/each}}
         {{/if}}
@@ -281,48 +281,48 @@ class SqlService extends AbstractSqlService implements SqlServiceInterface
     {{~#each relations}}
 
     /**
-     * Links {{@key}}
+     * Links {{name}}
      *
      * @param *int ${{../name}}Primary
-     * @param *int ${{@key}}Primary
+     * @param *int ${{name}}Primary
      */
-    public function link{{camel @key 1}}(${{../name}}Primary, ${{@key}}Primary)
+    public function link{{camel name 1}}(${{../name}}Primary, ${{name}}Primary)
     {
         return $this->resource
             ->model()
             ->set{{camel ../primary 1}}(${{../name}}Primary)
-            ->set{{camel primary 1}}(${{@key}}Primary)
-            ->insert('{{../name}}_{{@key}}');
+            ->set{{camel primary 1}}(${{name}}Primary)
+            ->insert('{{../name}}_{{name}}');
     }
 
     /**
-     * Unlinks {{@key}}
+     * Unlinks {{name}}
      *
      * @param *int ${{../name}}Primary
-     * @param *int ${{@key}}Primary
+     * @param *int ${{name}}Primary
      */
-    public function unlink{{capital @key 1}}(${{../name}}Primary, ${{@key}}Primary)
+    public function unlink{{capital name 1}}(${{../name}}Primary, ${{name}}Primary)
     {
         return $this->resource
             ->model()
             ->set{{camel ../primary 1}}(${{../name}}Primary)
-            ->set{{camel primary 1}}(${{@key}}Primary)
-            ->remove('{{../name}}_{{@key}}');
+            ->set{{camel primary 1}}(${{name}}Primary)
+            ->remove('{{../name}}_{{name}}');
     }
         {{~#if many}}
 
     /**
-     * Unlinks All {{@key}}
+     * Unlinks All {{name}}
      *
      * @param *int ${{../name}}Primary
-     * @param *int ${{@key}}Primary
+     * @param *int ${{name}}Primary
      */
-    public function unlinkAll{{camel @key 1}}(${{../name}}Primary)
+    public function unlinkAll{{camel name 1}}(${{../name}}Primary)
     {
         return $this->resource
             ->model()
             ->set{{camel ../primary 1}}(${{../name}}Primary)
-            ->remove('{{../name}}_{{@key}}');
+            ->remove('{{../name}}_{{name}}');
     }
         {{~/if}}
     {{/each}}

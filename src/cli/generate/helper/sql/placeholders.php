@@ -62,8 +62,8 @@ $createPlaceholderQueries = function($data, $database) {
         return $queries;
     }
 
-    foreach($data['relations'] as $name => $relation) {
-        $query = $database->getInsertQuery($data['name'] . '_' . $name);
+    foreach($data['relations'] as $relation) {
+        $query = $database->getInsertQuery($data['name'] . '_' . $relation['name']);
 
         $found = false;
         foreach($data['fixtures'] as $i => $row) {

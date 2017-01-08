@@ -136,25 +136,47 @@ namespace Cradle\Sink\Faucet;
  */
 class Schema
 {
+    /**
+     * @var string $root
+     */
+    protected $root;
 
+    /**
+     * @var string $name
+     */
+    protected $name;
+
+    /**
+     * @var string $schema
+     */
+    protected $schema;
+
+    /**
+     * Sets the schema name and path
+     *
+     * @param *string $root Location to the schema folder
+     * @param *string $name can be `post` or `ecommerce/product`
+     */
     public function __construct($root, $name)
     {
         $this->root = $root;
         $this->name = $name;
+
+        if(strpos($name, '/') !== false) {
+            $this->name = substr($name, strpos($name, '/') + 1);
+        }
+
+        $this->scehma = $this->root . '/' . $name . '.php';
     }
 
     public function getData()
     {
-        if(!file_exists($this->root . '/' . $this->name . '.php')) {
+        if(!file_exists($this->scehma)) {
             return false;
         }
 
-        $data = include $this->root . '/' . $this->name . '.php';
+        $data = include $this->scehma;
         $data['name'] = $this->name;
-
-        if(!isset($data['relations']) || !is_array($data['relations'])) {
-            $data['relations'] = [];
-        }
 
         if(!isset($data['fields']) || !is_array($data['fields'])) {
             $data['fields'] = [];
@@ -165,25 +187,19 @@ class Schema
             $this->addFlags($data['fields'][$name], $data);
         }
 
+        if(!isset($data['relations']) || !is_array($data['relations'])) {
+            $data['relations'] = [];
+        }
+
         foreach($data['relations'] as $name => $relation) {
-            //because there are no schemas for this
-            if($name === 'app') {
-                $data['json'][] = 'app_permissions';
-                continue;
-            }
+            $data['relations'][$name]['name'] = $name;
 
-            if($name === 'auth') {
-                $data['json'][] = 'auth_permissions';
-                continue;
-            }
-
-            if($name === 'session') {
-                $data['json'][] = 'session_permissions';
-                continue;
+            if(strpos($name, '/') !== false) {
+                $data['relations'][$name]['name'] = substr($name, strpos($name, '/') + 1);
             }
 
             //prevent recursion loop
-            if($data['name'] === $name) {
+            if($this->scehma === $this->root . '/' . $name . '.php') {
                 $schema = $data;
             } else {
                 $schema = new self($this->root, $name);

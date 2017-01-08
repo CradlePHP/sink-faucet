@@ -164,9 +164,9 @@ $cradle->on('{{name}}-create', function ($request, $response) {
     $results = ${{name}}Sql->create($data);
 
     {{~#each relations}}
-    //link {{@key}}
+    //link {{name}}
     if(isset($data['{{primary}}'])) {
-        ${{../name}}Sql->link{{camel @key 1}}($results['{{../primary}}'], $data['{{primary}}']);
+        ${{../name}}Sql->link{{camel name 1}}($results['{{../primary}}'], $data['{{primary}}']);
     }
     {{~/each}}
 

@@ -84,7 +84,7 @@ $createSchmeaQueries = function($data, $database) {
     if(isset($data['relations'])) {
         //determine the relation schema
         foreach($data['relations'] as $name => $relation) {
-            $query = $database->getCreateQuery($data['name'] . '_' . $name);
+            $query = $database->getCreateQuery($data['name'] . '_' . $relation['name']);
 
             $query->addPrimaryKey($data['primary']);
             $query->addField($data['primary'], [
@@ -100,7 +100,7 @@ $createSchmeaQueries = function($data, $database) {
                 'attribute' => 'UNSIGNED'
             ]);
 
-            $queries[] = 'DROP TABLE IF EXISTS `'. $data['name'] . '_' . $name . '`;';
+            $queries[] = 'DROP TABLE IF EXISTS `'. $data['name'] . '_' . $relation['name'] . '`;';
             $queries[] = (string) $query;
         }
     }

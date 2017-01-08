@@ -166,10 +166,10 @@ $createAlterQueries = function($data, $database) {
     }
 
     $installed = $database->getTables($data['name'] . '_%');
-    $relations = [];
 
-    if(isset($data['relations'])) {
-        $relations = array_keys($data['relations']);
+    $relations = [];
+    foreach($data['relations'] as $relation) {
+        $relations[] = $relation['name'];
     }
 
     foreach($installed as $relation) {
@@ -180,13 +180,13 @@ $createAlterQueries = function($data, $database) {
         }
     }
 
-    foreach($data['relations'] as $name => $relation) {
+    foreach($data['relations'] as $relation) {
         //install if it's installed
-        if (in_array($data['name'] . '_' . $name, $installed)) {
+        if (in_array($data['name'] . '_' . $relation['name'], $installed)) {
             continue;
         }
 
-        $query = $database->getCreateQuery($data['name'] . '_' . $name);
+        $query = $database->getCreateQuery($data['name'] . '_' . $relation['name']);
 
         $query->addPrimaryKey($data['primary']);
         $query->addField($data['primary'], [

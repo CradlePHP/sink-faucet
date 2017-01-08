@@ -59,6 +59,9 @@ $cradle->get('/admin/{{name}}/search', function($request, $response) {
     //we do this to prevent SQL injections
     if(is_array($request->getStage('filter'))) {
         $filterable = [
+        {{~#if active}}
+        '{{active}}',
+        {{~/if}}
         {{~#each filterable}}
             {{~#noop}}
             '{{this}}'{{#unless @last}},{{/unless}}
@@ -72,6 +75,23 @@ $cradle->get('/admin/{{name}}/search', function($request, $response) {
             }
         }
     }
+    {{~else}}
+        {{~#if active}}
+
+    //filter possible filter options
+    //we do this to prevent SQL injections
+    if(is_array($request->getStage('filter'))) {
+        $filterable = [
+            '{{active}}'
+        ];
+
+        foreach($request->getStage('filter') as $key => $value) {
+            if(!in_array($key, $filterable)) {
+                $request->removeStage('filter', $key);
+            }
+        }
+    }
+        {{~/if}}
     {{~/if}}
 
     //trigger job
@@ -237,7 +257,7 @@ $cradle->post('/admin/{{name}}/create', function($request, $response) {
         $request->setStage('profile_id', $request->getSession('me', 'profile_id'));
     }
     {{~/if}}
-    {{~#if relations.app}}
+    {{~#if relations.oauth/app}}
 
     if(!$request->hasStage('app_id')) {
         $request->setStage('app_id', 1);
