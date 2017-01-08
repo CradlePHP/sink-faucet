@@ -26,7 +26,7 @@ class Cradle_Module_{{capital name}}_ValidatorTest extends PHPUnit_Framework_Tes
         $actual = Validator::getCreateErrors([]);
         {{~#each fields}}{{~#each validation}}
         {{~#when method '===' 'required'}}
-        $this->assertEquals('Required', $actual['{{../@key}}']);
+        $this->assertEquals('{{message}}', $actual['{{../@key}}']);
         {{~/when}}{{/each}}{{/each}}
     }
 
@@ -37,6 +37,6 @@ class Cradle_Module_{{capital name}}_ValidatorTest extends PHPUnit_Framework_Tes
     {
         $actual = Validator::getUpdateErrors([]);
 
-        $this->assertEquals('Required', $actual['{{primary}}']);
+        $this->assertEquals('Invalid ID', $actual['{{primary}}']);
     }
 }

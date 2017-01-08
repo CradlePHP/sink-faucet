@@ -67,7 +67,7 @@ $cradle->get('/admin/{{name}}/search', function($request, $response) {
         ];
 
         foreach($request->getStage('filter') as $key => $value) {
-            if(!in_array($key, $sortable)) {
+            if(!in_array($key, $filterable)) {
                 $request->removeStage('filter', $key);
             }
         }

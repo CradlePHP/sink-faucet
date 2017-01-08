@@ -471,6 +471,34 @@ class Schema
             }
         }
 
+        if(isset($field['test']['pass'])) {
+            if(is_string($field['test']['pass'])) {
+                $field['test']['pass'] = '\''.$field['test']['pass'].'\'';
+            } else if(is_null($field['test']['pass'])) {
+                $field['test']['pass'] = 'null';
+            } else if(is_array($field['test']['pass']) || is_object($field['test']['pass'])) {
+                $field['test']['pass'] = var_export($field['test']['pass'], true);
+            } else if($field['test']['pass'] === true) {
+                $field['test']['pass'] = '1';
+            } else if($field['test']['pass'] === false) {
+                $field['test']['pass'] = '0';
+            }
+        }
+
+        if(isset($field['test']['fail'])) {
+            if(is_string($field['test']['fail'])) {
+                $field['test']['fail'] = '\''.$field['test']['fail'].'\'';
+            } else if(is_null($field['test']['fail'])) {
+                $field['test']['fail'] = 'null';
+            } else if(is_array($field['test']['fail']) || is_object($field['test']['fail'])) {
+                $field['test']['fail'] = var_export($field['test']['fail'], true);
+            } else if($field['test']['fail'] === true) {
+                $field['test']['fail'] = '1';
+            } else if($field['test']['fail'] === false) {
+                $field['test']['fail'] = '0';
+            }
+        }
+
         return $field;
     }
 }

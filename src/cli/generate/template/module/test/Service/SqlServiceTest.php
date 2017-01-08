@@ -44,7 +44,9 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
             {{~/when}}{{/each}}{{/each}}
         ]);
 
-        $this->assertEquals(2, $actual['{{primary}}']);
+        $id = $this->object->getResource()->getLastInsertedId();
+
+        $this->assertEquals($id, $actual['{{primary}}']);
     }
 
     /**
@@ -74,14 +76,16 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
      */
     public function testUpdate()
     {
+        $id = $this->object->getResource()->getLastInsertedId();
         $actual = $this->object->update([
+            '{{primary}}' => $id,
             {{~#each fields}}{{~#each validation}}
             {{~#when method '===' 'required'}}
-            '{{../@key}}' => {{../sample}},
+            '{{../@key}}' => {{../test.pass}},
             {{~/when}}{{/each}}{{/each}}
         ]);
 
-        $this->assertEquals(2, $actual['{{primary}}']);
+        $this->assertEquals($id, $actual['{{primary}}']);
     }
     {{~#if unique.0}}
 
@@ -90,7 +94,7 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
      */
     public function testExists()
     { {{#each fields}}{{#if sql.unique}}
-        $actual = $this->object->exists('{{test.pass}}');
+        $actual = $this->object->exists({{test.pass}});
         {{~/if}}{{/each}}
         // it returns a boolean so we're expecting it to be true because
         // the slug provided is saved in the database
@@ -103,10 +107,11 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
      */
     public function testRemove()
     {
-        $actual = $this->object->remove(2);
+        $id = $this->object->getResource()->getLastInsertedId();
+        $actual = $this->object->remove($id);
 
         $this->assertTrue(!empty($actual));
-        $this->assertEquals(2, $actual['{{primary}}']);
+        $this->assertEquals($id, $actual['{{primary}}']);
     }
 
     {{~#each relations}}

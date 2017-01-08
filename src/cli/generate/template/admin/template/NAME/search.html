@@ -1,5 +1,22 @@
+{{#if active}}
+\{\{#when filter.{{active}} '===' '0'\}\}
+    <h3>
+        \{\{number total\}\} Inactive \{\{title\}\}
+        \{\{#if q.0\}\}
+            matching \{\{q.0\}\}
+        \{\{/if\}\}
+    </h3>
+\{\{else\}\}
+    <h3>
+        \{\{number total\}\} \{\{title\}\}
+        \{\{#if q.0\}\}
+            matching \{\{q.0\}\}
+        \{\{/if\}\}
+    </h3>
+\{\{/when\}\}
+{{else}}
 <h3>\{\{title\}\}</h3>
-
+{{/if}}
 <div class="clearfix">
     <!-- START: SEARCH FORM -->
     <form class="pull-right search form-inline" method="get">
@@ -11,6 +28,17 @@
     </form>
     <!-- END: SEARCH FORM -->
 
+    {{~#if active}}
+
+    <div class="btn-group" role="group" aria-label="...">
+        <a class="btn btn-primary" href="?filter[{{active}}]=1">
+            Active
+        </a>
+        <a class="btn btn-danger" href="?filter[{{active}}]=0">
+            Inactive
+        </a>
+    </div>
+    {{~/if}}
     <span>
         <a class="btn btn-success" href="/admin/{{name}}/create">
             <i class="fa fa-plus"></i>
@@ -162,8 +190,8 @@
     </div>
 
     <ul class="pagination">
-        \{\{#pagination total range\}\}
+        \{\{#pager total range\}\}
         <li\{\{#if active\}\} class="active"\{\{/if\}\}><a href="?\{\{href\}\}">\{\{page\}\}</a></li>
-        \{\{/pagination\}\}
+        \{\{/pager\}\}
     </ul>
 </form>
