@@ -2,7 +2,7 @@
 
 $createPlaceholderQueries = function($data, $database) {
     if(!isset($data['fixtures']) || empty($data['fixtures'])) {
-        return false;
+        return [];
     }
 
     $found = false;

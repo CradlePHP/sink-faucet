@@ -55,7 +55,7 @@ return function($request, $response) {
         return CommandLine::error($schema . ' not found. Aborting.');
     }
 
-    CommandLine::system('Generating admin...');
+    CommandLine::system('Generating REST...');
 
     //get the template data
     $handlebars = include __DIR__ . '/helper/handlebars.php';
@@ -120,6 +120,7 @@ return function($request, $response) {
             $contents = str_replace($flag, $flag . PHP_EOL . $add, $contents);
         }
 
+        CommandLine::info('Updating ' . $cradleFile);
         file_put_contents($cradleFile, $contents);
     }
 

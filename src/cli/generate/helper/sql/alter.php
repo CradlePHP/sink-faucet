@@ -63,7 +63,7 @@ $createAlterQueries = function($data, $database) {
             $attributes['null'] = false;
         }
 
-        if(isset($field['sql']['attribute']) && $field['sql'][$name]['attribute']) {
+        if(isset($field['sql']['attribute']) && $field['sql']['attribute']) {
             $attributes['attribute'] = $field['sql']['attribute'];
         }
 

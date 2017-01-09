@@ -22,115 +22,148 @@ return function($request, $response) {
     }
 
     $cwd = $request->getServer('PWD');
-
     $schemaRoot = $cwd . '/schema';
+
     if(!is_dir($schemaRoot)) {
         return CommandLine::error('Schema folder not found. Generator Aborted.');
     }
 
     //Available schemas
-    $schemas = [];
+    $available = [];
     $paths = scandir($schemaRoot, 0);
     foreach($paths as $path) {
-        if($path === '.' || $path === '..' || substr($path, -4) !== '.php') {
+        if(strpos($path, '.') === 0) {
             continue;
         }
 
-        $schemas[] = pathinfo($path, PATHINFO_FILENAME);
-    }
-
-    if(empty($schemas)) {
-        return CommandLine::error('No schemas found in ' . $schemaRoot);
-    }
-
-    //determine the schema
-    $schemaName = $request->getStage('schema');
-
-    if(!$schemaName) {
-        CommandLine::info('Available schemas:');
-        foreach($schemas as $schema) {
-            CommandLine::info(' - ' . $schema);
+        if(!is_dir($schemaRoot . '/' . $path)
+            && !file_exists($schemaRoot . '/' . $path)
+        )
+        {
+            continue;
         }
 
-        $schemaName = CommandLine::input('Which schema to use?');
+        $available[] = pathinfo($path, PATHINFO_FILENAME);
     }
 
-    if(!in_array($schemaName, $schemas)) {
+    if(empty($available)) {
+        return CommandLine::error('No available schemas found in ' . $schemaRoot);
+    }
+
+    //determine the active schema
+    $active = $request->getStage('schema');
+
+    if(!$active) {
+        CommandLine::info('Available schemas:');
+        foreach($available as $name) {
+            CommandLine::info(' - ' . $name);
+        }
+
+        $active = CommandLine::input('Which schema to use?');
+    }
+
+    if(!in_array($active, $available)) {
         return CommandLine::error('Invalid schema. Generator Aborted.');
     }
 
-    $schema = $schemaRoot . '/' . $schemaName . '.php';
+    //it is possible that the active schema has multiple schemas
+    $schemas = [];
+    if(file_exists($schemaRoot . '/' . $active . '.php')) {
+        $schemas[] = $active;
+    } else if(is_dir($schemaRoot . '/' . $active)) {
+        $paths = scandir($schemaRoot . '/' . $active, 0);
 
-    if(!file_exists($schema)) {
-        return CommandLine::error($schema . ' not found. Aborting.');
+        foreach($paths as $path) {
+            if($path === '.' || $path === '..' || substr($path, -4) !== '.php') {
+                continue;
+            }
+
+            $schemas[] = $active . '/' . pathinfo($path, PATHINFO_FILENAME);
+        }
     }
 
     CommandLine::system('Generating SQL...');
 
-    //get the template data
-    $data = (new Schema($schemaRoot, $schemaName))->getData();
-
     $database = SqlFactory::load($service);
 
-    //pre build the create, alter and placeholders
-    $alter = false;
-    $create = include __DIR__ . '/helper/sql/create.php';
-    $placeholders = include __DIR__ . '/helper/sql/placeholders.php';
+    $actionQueries = [];
+    $createQueries = [];
+    $dataQueries = [];
 
-    //check for table
-    $tables = $database->getTables($data['name']);
+    foreach($schemas as $schema) {
+        //get the template data
+        $data = (new Schema($schemaRoot, $schema))->getData();
 
-    $answer = 'i';
-    if(in_array($data['name'], $tables)) {
-        $message = '%s was found in database. Alter(a), Install(i) or Cancel(c) ? (c)';
-        $answer = CommandLine::input(sprintf($message, $data['name']), 'c');
-    }
+        //pre build the create, alter and placeholders
+        $create = include __DIR__ . '/helper/sql/create.php';
+        $placeholders = include __DIR__ . '/helper/sql/placeholders.php';
 
-    if($answer === 'i') {
-        $queries = $create;
-        $message = "-- CREATE %s table\n```\n%s\n```";
-    } else if($answer === 'a') {
-        $queries = $alter = include __DIR__ . '/helper/sql/alter.php';
-        $message = "-- Alter %s table\n```\n%s\n```";
-    } else {
-        return CommandLine::error('Generator Aborted.');
+        //check for table
+        $tables = $database->getTables($data['name']);
+
+        $answer = 'i';
+        if(in_array($data['name'], $tables)) {
+            $message = '%s was found in database. Alter(a), Install(i) or skip(s)? (s)';
+            $answer = CommandLine::input(sprintf($message, $data['name']), 'c');
+        }
+
+        if($answer === 'i') {
+            $queries = $create;
+        } else if($answer === 'a') {
+            $queries = include __DIR__ . '/helper/sql/alter.php';
+        } else {
+            continue;
+        }
+
+        foreach($create as $query) {
+            $createQueries[] = $query;
+        }
+
+        foreach($queries as $query) {
+            $actionQueries[] = $query;
+        }
+
+        foreach($placeholders as $query) {
+            $dataQueries[] = $query;
+        }
     }
 
     //if nada
-    if(empty($queries) && !$placeholders) {
+    if(empty($actionQueries) && empty($dataQueries)) {
         //dont continue
         return CommandLine::error('Nothing to add or change.');
     }
 
-    //placeholders
-    if($placeholders) {
-        CommandLine::system('Updating placeholders...');
-        $destination = $cwd . '/module/' . $schemaName . '/placeholder.sql';
-        file_put_contents($destination, implode("\n\n", $placeholders));
-
-        $message = "-- Data for %s table\n```\n%s\n```";
-        CommandLine::info(sprintf($message, $data['name'], implode("\n\n", $placeholders)));
-    }
-
-    if(!empty($queries)) {
+    if(!empty($actionQueries)) {
         CommandLine::system('Updating schema...');
 
         //determine the next version
-        $moduleInstaller = $cwd . '/module/' . $schemaName . '/install';
+        $moduleInstaller = $cwd . '/module/' . $active . '/install';
 
         if(!is_dir($moduleInstaller)) {
             mkdir($moduleInstaller, 0777, true);
         }
 
-        $version = Installer::getNextVersion($schemaName);
+        $version = Installer::getNextVersion($active);
 
         $destination = $moduleInstaller . '/' . $version . '.sql';
-        file_put_contents($destination, implode("\n\n", $queries));
+        file_put_contents($destination, implode("\n\n", $actionQueries));
 
-        $destination = $cwd . '/module/' . $schemaName . '/schema.sql';
-        file_put_contents($destination, implode("\n\n", $create));
+        $destination = $cwd . '/module/' . $active . '/schema.sql';
+        file_put_contents($destination, implode("\n\n", $createQueries));
 
-        CommandLine::info(sprintf($message, $data['name'], implode("\n\n", $queries)));
+        $message = "-- Schema for %s module\n```\n%s\n```";
+        CommandLine::info(sprintf($message, $active, implode("\n\n", $actionQueries)));
+    }
+
+    //placeholders
+    if(!empty($dataQueries)) {
+        CommandLine::system('Updating placeholders...');
+        $destination = $cwd . '/module/' . $active . '/placeholder.sql';
+        file_put_contents($destination, implode("\n\n", $dataQueries));
+
+        $message = "-- Data for %s module\n```\n%s\n```";
+        CommandLine::info(sprintf($message, $active, implode("\n\n", $placeholders)));
     }
 
     CommandLine::success('SQL files were generated.');

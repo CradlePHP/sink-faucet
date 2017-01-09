@@ -15,75 +15,94 @@ use Cradle\Sink\Faucet\Installer;
 
 return function($request, $response) {
     $cwd = $request->getServer('PWD');
-
     $schemaRoot = $cwd . '/schema';
+
     if(!is_dir($schemaRoot)) {
         return CommandLine::error('Schema folder not found. Generator Aborted.');
     }
 
     //Available schemas
-    $schemas = [];
+    $available = [];
     $paths = scandir($schemaRoot, 0);
     foreach($paths as $path) {
-        if($path === '.' || $path === '..' || substr($path, -4) !== '.php') {
+        if(strpos($path, '.') === 0) {
             continue;
         }
 
-        $schemas[] = pathinfo($path, PATHINFO_FILENAME);
-    }
-
-    if(empty($schemas)) {
-        return CommandLine::error('No schemas found in ' . $schemaRoot);
-    }
-
-    //determine the schema
-    $schemaName = $request->getStage('schema');
-
-    if(!$schemaName) {
-        CommandLine::info('Available schemas:');
-        foreach($schemas as $schema) {
-            CommandLine::info(' - ' . $schema);
+        if(!is_dir($schemaRoot . '/' . $path)
+            && !file_exists($schemaRoot . '/' . $path)
+        )
+        {
+            continue;
         }
 
-        $schemaName = CommandLine::input('Which schema to use?');
+        $available[] = pathinfo($path, PATHINFO_FILENAME);
     }
 
-    if(!in_array($schemaName, $schemas)) {
+    if(empty($available)) {
+        return CommandLine::error('No available schemas found in ' . $schemaRoot);
+    }
+
+    //determine the active schema
+    $active = $request->getStage('schema');
+
+    if(!$active) {
+        CommandLine::info('Available schemas:');
+        foreach($available as $name) {
+            CommandLine::info(' - ' . $name);
+        }
+
+        $active = CommandLine::input('Which schema to use?');
+    }
+
+    if(!in_array($active, $available)) {
         return CommandLine::error('Invalid schema. Generator Aborted.');
     }
 
-    $schema = $schemaRoot . '/' . $schemaName . '.php';
+    //it is possible that the active schema has multiple schemas
+    $schemas = [];
+    if(file_exists($schemaRoot . '/' . $active . '.php')) {
+        $schemas[] = $active;
+    } else if(is_dir($schemaRoot . '/' . $active)) {
+        $paths = scandir($schemaRoot . '/' . $active, 0);
 
-    if(!file_exists($schema)) {
-        return CommandLine::error($schema . ' not found. Aborting.');
+        foreach($paths as $path) {
+            if($path === '.' || $path === '..' || substr($path, -4) !== '.php') {
+                continue;
+            }
+
+            $schemas[] = $active . '/' . pathinfo($path, PATHINFO_FILENAME);
+        }
     }
 
     CommandLine::system('Generating Elastic Map...');
 
-    //get the template data
-    $data = (new Schema($schemaRoot, $schemaName))->getData();
-
     $map = [];
-    foreach($data['fields'] as $name => $field) {
-        if(isset($field['elastic'])) {
-            $map[$data['name']][$name] = $field['elastic'];
-        }
-    }
+    foreach($schemas as $schema) {
+        //get the template data
+        $data = (new Schema($schemaRoot, $schema))->getData();
 
-    foreach($data['relations'] as $relation) {
-        if($relation['many']) {
-            continue;
-        }
-
-        foreach($relation['fields'] as $name => $field) {
+        foreach($data['fields'] as $name => $field) {
             if(isset($field['elastic'])) {
                 $map[$data['name']][$name] = $field['elastic'];
+            }
+        }
+
+        foreach($data['relations'] as $relation) {
+            if($relation['many']) {
+                continue;
+            }
+
+            foreach($relation['fields'] as $name => $field) {
+                if(isset($field['elastic'])) {
+                    $map[$data['name']][$name] = $field['elastic'];
+                }
             }
         }
     }
 
     //get destination
-    $destination = $cwd . '/module/' . $schemaName . '/elastic.php';
+    $destination = $cwd . '/module/' . $active . '/elastic.php';
 
     //if the destination exists
     if(file_exists($destination)) {
@@ -95,8 +114,8 @@ return function($request, $response) {
         }
     }
 
-    if(!is_dir($cwd . '/module/' . $schemaName)) {
-        mkdir(dirname($cwd . '/module/' . $schemaName), 0777, true);
+    if(!is_dir($cwd . '/module/' . $active)) {
+        mkdir(dirname($cwd . '/module/' . $active), 0777, true);
     }
 
     $contents = '<?php return ' . var_export($map, true) . ';';
