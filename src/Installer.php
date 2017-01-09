@@ -171,7 +171,7 @@ class Installer
         uksort($versions, 'version_compare');
 
         //get the current version
-        $versionFile = include cradle('global')->path('config') . '/version.php';
+        $versionFile = cradle('global')->path('config') . '/version.php';
 
         $current = [];
         if(file_exists($versionFile)) {
