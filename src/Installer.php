@@ -171,7 +171,14 @@ class Installer
         uksort($versions, 'version_compare');
 
         //get the current version
-        $current = cradle('global')->config('version');
+        $versionFile = include cradle('global')->path('config') . '/version.php';
+
+        $current = [];
+        if(file_exists($versionFile)) {
+            $current = include $versionFile;
+        }
+
+
         if(!isset($current[$module])) {
             $current[$module] = '0.0.0';
         }
@@ -207,10 +214,8 @@ class Installer
             $current[$module] = $version;
         }
 
-        $file = cradle('global')->path('config') . '/version.php';
-
         $contents = '<?php return ' . var_export($current, true) . ';';
-        file_put_contents($file, $contents);
+        file_put_contents($versionFile, $contents);
 
         return $current[$module];
     }
