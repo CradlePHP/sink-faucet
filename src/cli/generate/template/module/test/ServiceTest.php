@@ -7,11 +7,11 @@
  * distributed with this package.
  */
 
-use Cradle\Module\{{capital name}}\Service;
+use Cradle\Module\{{namespace}}\Service;
 
-use Cradle\Module\{{capital name}}\Service\SqlService;
-use Cradle\Module\{{capital name}}\Service\RedisService;
-use Cradle\Module\{{capital name}}\Service\ElasticService;
+use Cradle\Module\{{namespace}}\Service\SqlService;
+use Cradle\Module\{{namespace}}\Service\RedisService;
+use Cradle\Module\{{namespace}}\Service\ElasticService;
 
 /**
  * Service layer test
@@ -20,10 +20,10 @@ use Cradle\Module\{{capital name}}\Service\ElasticService;
  * @package  {{capital name}}
  * @author   John Doe <john@acme.com>
  */
-class Cradle_Module_{{capital name}}_ServiceTest extends PHPUnit_Framework_TestCase
+class Cradle_Module_{{classspace}}_ServiceTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @covers Cradle\Module\{{capital name}}\Service::get
+     * @covers Cradle\Module\{{namespace}}\Service::get
      */
     public function testGet()
     {

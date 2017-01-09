@@ -6,9 +6,9 @@
  * Copyright and license information can be found at LICENSE.txt
  * distributed with this package.
  */
-namespace Cradle\Module\{{camel name 1}};
+namespace Cradle\Module\{{namespace}};
 
-use Cradle\Module\{{camel name 1}}\Service as {{camel name 1}}Service;
+use Cradle\Module\{{namespace}}\Service as {{camel name 1}}Service;
 
 use Cradle\Module\Utility\Validator as UtilityValidator;
 

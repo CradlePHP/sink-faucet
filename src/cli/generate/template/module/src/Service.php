@@ -6,11 +6,11 @@
  * Copyright and license information can be found at LICENSE.txt
  * distributed with this package.
  */
-namespace Cradle\Module\{{camel name 1}};
+namespace Cradle\Module\{{namespace}};
 
-use Cradle\Module\{{camel name 1}}\Service\SqlService;
-use Cradle\Module\{{camel name 1}}\Service\RedisService;
-use Cradle\Module\{{camel name 1}}\Service\ElasticService;
+use Cradle\Module\{{namespace}}\Service\SqlService;
+use Cradle\Module\{{namespace}}\Service\RedisService;
+use Cradle\Module\{{namespace}}\Service\ElasticService;
 
 use Cradle\Module\Utility\Service\NoopService;
 use Cradle\Module\Utility\ServiceInterface;

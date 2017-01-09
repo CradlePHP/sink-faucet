@@ -7,9 +7,9 @@
  * distributed with this package.
  */
 
-namespace Cradle\Module\{{camel name 1}}\Service;
+namespace Cradle\Module\{{namespace}}\Service;
 
-use Cradle\Module\{{camel name 1}}\Service;
+use Cradle\Module\{{namespace}}\Service;
 
 use Elasticsearch\Client as Resource;
 

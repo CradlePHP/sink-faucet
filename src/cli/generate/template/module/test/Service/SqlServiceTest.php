@@ -7,7 +7,7 @@
  * distributed with this package.
  */
 
-use Cradle\Module\{{camel name 1}}\Service;
+use Cradle\Module\{{namespace}}\Service;
 
 /**
  * SQL service test
@@ -17,7 +17,7 @@ use Cradle\Module\{{camel name 1}}\Service;
  * @package  {{capital name}}
  * @author   John Doe <john@acme.com>
  */
-class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Framework_TestCase
+class Cradle_Module_{{classspace}}_Service_SqlServiceTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var SqlService $object
@@ -25,7 +25,7 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
     protected $object;
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::__construct
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::__construct
      */
     protected function setUp()
     {
@@ -33,7 +33,7 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
     }
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::create
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::create
      */
     public function testCreate()
     {
@@ -50,7 +50,7 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
     }
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::get
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::get
      */
     public function testGet()
     {
@@ -60,7 +60,7 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
     }
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::search
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::search
      */
     public function testSearch()
     {
@@ -72,7 +72,7 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
     }
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::update
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::update
      */
     public function testUpdate()
     {
@@ -90,7 +90,7 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
     {{~#if unique.0}}
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::exists
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::exists
      */
     public function testExists()
     { {{#each fields}}{{#if sql.unique}}
@@ -103,7 +103,7 @@ class Cradle_Module_{{capital name}}_Service_SqlServiceTest extends PHPUnit_Fram
     {{/if}}
 
     /**
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::remove
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::remove
      */
     public function testRemove()
     {

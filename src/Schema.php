@@ -147,6 +147,11 @@ class Schema
     protected $name;
 
     /**
+     * @var string $namespace
+     */
+    protected $namespace;
+
+    /**
      * @var string $schema
      */
     protected $schema;
@@ -161,9 +166,13 @@ class Schema
     {
         $this->root = $root;
         $this->name = $name;
+        $this->namespace = ucwords($name);
 
         if(strpos($name, '/') !== false) {
             $this->name = substr($name, strpos($name, '/') + 1);
+            $this->namespace = str_replace('/', ' ', $name);
+            $this->namespace = ucwords($this->namespace);
+            $this->namespace = str_replace(' ', '\\', $this->namespace);
         }
 
         $this->scehma = $this->root . '/' . $name . '.php';
@@ -177,6 +186,8 @@ class Schema
 
         $data = include $this->scehma;
         $data['name'] = $this->name;
+        $data['namespace'] = $this->namespace;
+        $data['classspace'] = str_replace('\\', '_', $this->namespace);
 
         if(!isset($data['fields']) || !is_array($data['fields'])) {
             $data['fields'] = [];

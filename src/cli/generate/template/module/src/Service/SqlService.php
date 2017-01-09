@@ -7,7 +7,7 @@
  * distributed with this package.
  */
 
-namespace Cradle\Module\{{camel name 1}}\Service;
+namespace Cradle\Module\{{namespace}}\Service;
 
 use PDO as Resource;
 use Cradle\Sql\SqlFactory;

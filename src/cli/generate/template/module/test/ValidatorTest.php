@@ -7,7 +7,7 @@
  * distributed with this package.
  */
 
-use Cradle\Module\{{capital name}}\Validator;
+use Cradle\Module\{{namespace}}\Validator;
 
 /**
  * Validator layer test
@@ -16,10 +16,10 @@ use Cradle\Module\{{capital name}}\Validator;
  * @package  {{capital name}}
  * @author   John Doe <john@acme.com>
  */
-class Cradle_Module_{{capital name}}_ValidatorTest extends PHPUnit_Framework_TestCase
+class Cradle_Module_{{classspace}}_ValidatorTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @covers Cradle\Module\{{capital name}}\Validator::getCreateErrors
+     * @covers Cradle\Module\{{namespace}}\Validator::getCreateErrors
      */
     public function testGetCreateErrors()
     {
@@ -31,7 +31,7 @@ class Cradle_Module_{{capital name}}_ValidatorTest extends PHPUnit_Framework_Tes
     }
 
     /**
-     * @covers Cradle\Module\{{capital name}}\Validator::getUpdateErrors
+     * @covers Cradle\Module\{{namespace}}\Validator::getUpdateErrors
      */
     public function testGetUpdateErrors()
     {

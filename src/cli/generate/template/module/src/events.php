@@ -7,8 +7,8 @@
  * distributed with this package.
  */
 
-use Cradle\Module\{{camel name 1}}\Service as {{camel name 1}}Service;
-use Cradle\Module\{{camel name 1}}\Validator as {{camel name 1}}Validator;
+use Cradle\Module\{{namespace}}\Service as {{camel name 1}}Service;
+use Cradle\Module\{{namespace}}\Validator as {{camel name 1}}Validator;
 
 use Cradle\Http\Request;
 use Cradle\Http\Response;

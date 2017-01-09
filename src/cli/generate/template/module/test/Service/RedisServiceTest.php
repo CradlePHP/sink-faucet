@@ -7,7 +7,7 @@
  * distributed with this package.
  */
 
-use Cradle\Module\{{capital name}}\Service;
+use Cradle\Module\{{namespace}}\Service;
 
 /**
  * Redis service test
@@ -16,7 +16,7 @@ use Cradle\Module\{{capital name}}\Service;
  * @package  {{capital name}}
  * @author   John Doe <john@acme.com>
  */
-class Cradle_Module_{{capital name}}_Service_RedisServiceTest extends PHPUnit_Framework_TestCase
+class Cradle_Module_{{classspace}}_Service_RedisServiceTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var RedisService $object
@@ -24,7 +24,7 @@ class Cradle_Module_{{capital name}}_Service_RedisServiceTest extends PHPUnit_Fr
     protected $object;
 
     /**
-     * @covers Cradle\Module\{{capital name}}\Service\RedisService::__construct
+     * @covers Cradle\Module\{{namespace}}\Service\RedisService::__construct
      */
     protected function setUp()
     {

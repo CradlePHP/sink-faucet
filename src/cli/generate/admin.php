@@ -12,132 +12,152 @@ use Cradle\Sink\Faucet\Schema;
 
 return function($request, $response) {
     $cwd = $request->getServer('PWD');
-
     $schemaRoot = $cwd . '/schema';
+
     if(!is_dir($schemaRoot)) {
         return CommandLine::error('Schema folder not found. Generator Aborted.');
     }
 
     //Available schemas
-    $schemas = [];
+    $available = [];
     $paths = scandir($schemaRoot, 0);
     foreach($paths as $path) {
-        if($path === '.' || $path === '..' || substr($path, -4) !== '.php') {
+        if(strpos($path, '.') === 0) {
             continue;
         }
 
-        $schemas[] = pathinfo($path, PATHINFO_FILENAME);
-    }
-
-    if(empty($schemas)) {
-        return CommandLine::error('No schemas found in ' . $schemaRoot);
-    }
-
-    //determine the schema
-    $schemaName = $request->getStage('schema');
-
-    if(!$schemaName) {
-        CommandLine::info('Available schemas:');
-        foreach($schemas as $schema) {
-            CommandLine::info(' - ' . $schema);
+        if(!is_dir($schemaRoot . '/' . $path)
+            && !file_exists($schemaRoot . '/' . $path)
+        )
+        {
+            continue;
         }
 
-        $schemaName = CommandLine::input('Which schema to use?');
+        $available[] = pathinfo($path, PATHINFO_FILENAME);
     }
 
-    if(!in_array($schemaName, $schemas)) {
+    if(empty($available)) {
+        return CommandLine::error('No available schemas found in ' . $schemaRoot);
+    }
+
+    //determine the active schema
+    $active = $request->getStage('schema');
+
+    if(!$active) {
+        CommandLine::info('Available schemas:');
+        foreach($available as $name) {
+            CommandLine::info(' - ' . $name);
+        }
+
+        $active = CommandLine::input('Which schema to use?');
+    }
+
+    if(!in_array($active, $available)) {
         return CommandLine::error('Invalid schema. Generator Aborted.');
     }
 
-    $schema = $schemaRoot . '/' . $schemaName . '.php';
+    //it is possible that the active schema has multiple schemas
+    $schemas = [];
+    if(file_exists($schemaRoot . '/' . $active . '.php')) {
+        $schemas[] = $active;
+    } else if(is_dir($schemaRoot . '/' . $active)) {
+        $paths = scandir($schemaRoot . '/' . $active, 0);
 
-    if(!file_exists($schema)) {
-        return CommandLine::error($schema . ' not found. Aborting.');
+        foreach($paths as $path) {
+            if($path === '.' || $path === '..' || substr($path, -4) !== '.php') {
+                continue;
+            }
+
+            $schemas[] = $active . '/' . pathinfo($path, PATHINFO_FILENAME);
+        }
     }
 
     CommandLine::system('Generating admin...');
-
-    //get the template data
     $handlebars = include __DIR__ . '/helper/handlebars.php';
-    $data = (new Schema($schemaRoot, $schemaName))->getData();
 
-    //get destination root
+    //get source and destination root
+    $sourceRoot = __DIR__ . '/template/admin';
     $destinationRoot = $cwd . '/app/admin/src';
 
-    //get all the files
-    $sourceRoot = __DIR__ . '/template/admin';
-    $paths = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($sourceRoot));
-    foreach ($paths as $source) {
-        //is it a folder ?
-        if($source->isDir()) {
-            continue;
-        }
+    foreach($schemas as $schema) {
+        //get the template data
+        $data = (new Schema($schemaRoot, $schema))->getData();
 
-        //it's a file, determine the destination
-        // if /template/module/src/events.php, then /path/to/file
-        $destination = $destinationRoot . substr($source->getPathname(), strlen($sourceRoot));
-        $destination = str_replace('NAME', $schemaName, $destination);
+        //get all the files
+        $paths = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($sourceRoot));
 
-        //does it not exist?
-        if(!is_dir(dirname($destination))) {
-            //then make it
-            mkdir(dirname($destination), 0777, true);
-        }
-
-        //if the destination exists
-        if(file_exists($destination)) {
-            //ask questions
-            $overwrite = CommandLine::input($destination .' exists. Overwrite?(n)', 'n');
-            if($overwrite === 'n') {
-                CommandLine::warning('Skipping...');
+        foreach ($paths as $source) {
+            //is it a folder ?
+            if($source->isDir()) {
                 continue;
             }
+
+            //it's a file, determine the destination
+            // if /template/module/src/events.php, then /path/to/file
+            $destination = $destinationRoot . substr($source->getPathname(), strlen($sourceRoot));
+            $destination = str_replace('NAME', $data['name'], $destination);
+
+            //does it not exist?
+            if(!is_dir(dirname($destination))) {
+                //then make it
+                mkdir(dirname($destination), 0777, true);
+            }
+
+            //if the destination exists
+            if(file_exists($destination)) {
+                //ask questions
+                $overwrite = CommandLine::input($destination .' exists. Overwrite?(n)', 'n');
+                if($overwrite === 'n') {
+                    CommandLine::warning('Skipping...');
+                    continue;
+                }
+            }
+
+            CommandLine::info('Making ' . $destination);
+
+            $contents = file_get_contents($source->getPathname());
+            $template = $handlebars->compile($contents);
+
+            $contents = $template($data);
+            $contents = str_replace('{{ ', '{{', $contents);
+
+            file_put_contents($destination, $contents);
         }
 
-        CommandLine::info('Making ' . $destination);
-
-        $contents = file_get_contents($source->getPathname());
-        $template = $handlebars->compile($contents);
-
-        $contents = $template($data);
-        $contents = str_replace('{{ ', '{{', $contents);
-
-        file_put_contents($destination, $contents);
-    }
-
-    //add to cradle.php
-    $cradleFile = $cwd . '/app/admin/.cradle.php';
-    if(file_exists($cwd . '/app/admin/.cradle')) {
-        $cradleFile = $cwd . '/app/admin/.cradle';
-    }
-
-    if(file_exists($cradleFile)) {
-        $flag = '//START: GENERATED CONTROLLERS';
-        $add = 'include_once __DIR__ . \'/src/controller/' . $data['name'] . '.php\';';
-
-        $contents = file_get_contents($cradleFile);
-        if(strpos($contents, $flag) !== false && strpos($contents, $add) === false) {
-            $contents = str_replace($flag, $flag . PHP_EOL . $add, $contents);
+        //add to cradle.php
+        $cradleFile = $cwd . '/app/admin/.cradle.php';
+        if(file_exists($cwd . '/app/admin/.cradle')) {
+            $cradleFile = $cwd . '/app/admin/.cradle';
         }
 
-        CommandLine::info('Updating ' . $cradleFile);
-        file_put_contents($cradleFile, $contents);
-    }
+        if(file_exists($cradleFile)) {
+            $flag = '//START: GENERATED CONTROLLERS';
+            $add = 'include_once __DIR__ . \'/src/controller/' . $data['name'] . '.php\';';
 
-    //add to _head.html
-    $headFile = $destinationRoot . '/template/_head.html';
-    if(file_exists($headFile)) {
-        $flag = '<!-- START: GENERATED MENU -->';
-        $add = '<li><a href="/admin/' . $data['name'] . '/search">' . $data['plural'] . '</a></li>';
+            $contents = file_get_contents($cradleFile);
+            if(strpos($contents, $flag) !== false && strpos($contents, $add) === false) {
+                $contents = str_replace($flag, $flag . PHP_EOL . $add, $contents);
+            }
 
-        $contents = file_get_contents($headFile);
-        if(strpos($contents, $flag) !== false && strpos($contents, $add) === false) {
-            $contents = str_replace($flag, $flag . PHP_EOL . $add, $contents);
+            CommandLine::info('Updating ' . $cradleFile);
+            file_put_contents($cradleFile, $contents);
         }
 
-        CommandLine::info('Updating ' . $headFile);
-        file_put_contents($headFile, $contents);
+        //add to _head.html
+        $headFile = $destinationRoot . '/template/_head.html';
+        if(file_exists($headFile)) {
+            $flag = '<!-- START: GENERATED MENU -->';
+            $add = '<li><a href="/admin/' . $data['name'] . '/search">' . $data['plural'] . '</a></li>';
+
+            $contents = file_get_contents($headFile);
+            if(strpos($contents, $flag) !== false && strpos($contents, $add) === false) {
+                $contents = str_replace($flag, $flag . PHP_EOL . $add, $contents);
+            }
+
+            CommandLine::info('Updating ' . $headFile);
+            file_put_contents($headFile, $contents);
+        }
     }
 
-    CommandLine::success($schemaName . ' admin was generated.');
+    CommandLine::success($active . ' admin was generated.');
 };

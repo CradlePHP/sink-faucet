@@ -17,7 +17,7 @@ use Cradle\Http\Response;
  * @package  {{capital name}}
  * @author   John Doe <john@acme.com>
  */
-class Cradle_Module_{{camel name 1}}_EventsTest extends PHPUnit_Framework_TestCase
+class Cradle_Module_{{classspace}}_EventsTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var Request $request
@@ -50,9 +50,9 @@ class Cradle_Module_{{camel name 1}}_EventsTest extends PHPUnit_Framework_TestCa
     /**
      * {{name}}-create
      *
-     * @covers Cradle\Module\{{camel name 1}}\Validator::getCreateErrors
-     * @covers Cradle\Module\{{camel name 1}}\Validator::getOptionalErrors
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::create
+     * @covers Cradle\Module\{{namespace}}\Validator::getCreateErrors
+     * @covers Cradle\Module\{{namespace}}\Validator::getOptionalErrors
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::create
      * @covers Cradle\Module\Utility\Service\AbstractElasticService::create
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::createDetail
      */
@@ -81,7 +81,7 @@ class Cradle_Module_{{camel name 1}}_EventsTest extends PHPUnit_Framework_TestCa
     /**
      * {{name}}-detail
      *
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::get
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::get
      * @covers Cradle\Module\Utility\Service\AbstractElasticService::get
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::getDetail
      */
@@ -96,10 +96,10 @@ class Cradle_Module_{{camel name 1}}_EventsTest extends PHPUnit_Framework_TestCa
     /**
      * {{name}}-remove
      *
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::get
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::get
      * @covers Cradle\Module\Utility\Service\AbstractElasticService::get
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::getDetail
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::update
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::update
      * @covers Cradle\Module\Utility\Service\AbstractElasticService::update
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::removeDetail
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::removeSearch
@@ -117,10 +117,10 @@ class Cradle_Module_{{camel name 1}}_EventsTest extends PHPUnit_Framework_TestCa
     /**
      * {{name}}-restore
      *
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::get
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::get
      * @covers Cradle\Module\Utility\Service\AbstractElasticService::get
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::getDetail
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::update
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::update
      * @covers Cradle\Module\Utility\Service\AbstractElasticService::update
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::removeDetail
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::removeSearch
@@ -138,8 +138,8 @@ class Cradle_Module_{{camel name 1}}_EventsTest extends PHPUnit_Framework_TestCa
     /**
      * {{name}}-search
      *
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::search
-     * @covers Cradle\Module\{{camel name 1}}\Service\ElasticService::search
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::search
+     * @covers Cradle\Module\{{namespace}}\Service\ElasticService::search
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::getSearch
      */
     public function test{{camel name 1}}Search()
@@ -151,10 +151,10 @@ class Cradle_Module_{{camel name 1}}_EventsTest extends PHPUnit_Framework_TestCa
     /**
      * {{name}}-update
      *
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::get
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::get
      * @covers Cradle\Module\Utility\Service\AbstractElasticService::get
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::getDetail
-     * @covers Cradle\Module\{{camel name 1}}\Service\SqlService::update
+     * @covers Cradle\Module\{{namespace}}\Service\SqlService::update
      * @covers Cradle\Module\Utility\Service\AbstractElasticService::update
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::removeDetail
      * @covers Cradle\Module\Utility\Service\AbstractRedisService::removeSearch

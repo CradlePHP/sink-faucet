@@ -7,7 +7,7 @@
  * distributed with this package.
  */
 
-use Cradle\Module\{{capital name}}\Service;
+use Cradle\Module\{{namespace}}\Service;
 
 /**
  * Elastic service test
@@ -16,7 +16,7 @@ use Cradle\Module\{{capital name}}\Service;
  * @package  {{capital name}}
  * @author   John Doe <john@acme.com>
  */
-class Cradle_Module_{{capital name}}_Service_ElasticServiceTest extends PHPUnit_Framework_TestCase
+class Cradle_Module_{{classspace}}_Service_ElasticServiceTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var ElasticService $object
@@ -24,7 +24,7 @@ class Cradle_Module_{{capital name}}_Service_ElasticServiceTest extends PHPUnit_
     protected $object;
 
     /**
-     * @covers Cradle\Module\{{capital name}}\Service\ElasticService::__construct
+     * @covers Cradle\Module\{{namespace}}\Service\ElasticService::__construct
      */
     protected function setUp()
     {
@@ -82,7 +82,7 @@ class Cradle_Module_{{capital name}}_Service_ElasticServiceTest extends PHPUnit_
     }
 
     /**
-     * @covers Cradle\Module\{{capital name}}\Service\ElasticService::search
+     * @covers Cradle\Module\{{namespace}}\Service\ElasticService::search
      */
     public function testSearch()
     {
