@@ -30,7 +30,7 @@ return function ($request, $response) {
 
     $database = SqlFactory::load($this->package('global')->service('sql-main'));
 
-    CommandLine::system('Mapping Index...');
+    CommandLine::system('Mapping Elastic...');
 
     //in this iteration
     //we need to get a flat version of all
@@ -111,6 +111,30 @@ return function ($request, $response) {
 
             if ($column['Key']) {
                 $meta[$column['Field']]['fields']['keyword']['type'] = 'keyword';
+            }
+        }
+    }
+
+    //in this iteration the elastic map found in module will override
+    $cwd = $request->getServer('PWD');
+    $paths = scandir($cwd . '/module', 0);
+
+    foreach($paths as $path) {
+        if($path === '.' || $path === '..') {
+            continue;
+        }
+
+        $elastic = $cwd . '/module/' . $path . '/elastic.php';
+
+        if(!file_exists($elastic)) {
+            continue;
+        }
+
+        $fileMap = include $elastic;
+
+        foreach($fileMap as $name => $fields) {
+            foreach($fields as $name => $map) {
+                $meta[$name] = $map;
             }
         }
     }

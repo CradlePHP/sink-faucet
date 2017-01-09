@@ -25,7 +25,12 @@ return function ($request, $response) {
     $tables = $database->getTables();
     foreach ($tables as $table) {
         //if we just want to flush one table
-        if($request->hasStage('module') && strpos($table, $request->getStage('module')) !== 0) {
+        if($request->hasStage('table') && $table === $request->getStage('table')) {
+            continue;
+        }
+
+        //if we just want to flush one tableset
+        if($request->hasStage('tableset') && strpos($table, $request->getStage('tableset')) !== 0) {
             continue;
         }
 

@@ -188,3 +188,11 @@ $cradle->on('faucet-generate-rest', include __DIR__ . '/cli/generate/rest.php');
  * @param Response $response
  */
 $cradle->on('faucet-generate-sql', include __DIR__ . '/cli/generate/sql.php');
+
+/**
+ * CLI Elastic generate
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$cradle->on('faucet-generate-elastic', include __DIR__ . '/cli/generate/elastic.php');

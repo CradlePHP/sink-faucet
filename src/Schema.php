@@ -210,8 +210,12 @@ class Schema
                 continue;
             }
 
-            if(!isset($relation['primary']) && isset($schema['primary'])) {
-                $data['relations'][$name]['primary'] = $schema['primary'];
+            $keys = ['primary', 'active', 'created', 'updated', 'fields'];
+
+            foreach($keys as $key) {
+                if(!isset($relation[$key]) && isset($schema[$key])) {
+                    $data['relations'][$name][$key] = $schema[$key];
+                }
             }
 
             if($relation['many']) {

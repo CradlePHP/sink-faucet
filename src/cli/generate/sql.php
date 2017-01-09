@@ -130,21 +130,13 @@ return function($request, $response) {
         $destination = $cwd . '/module/' . $schemaName . '/schema.sql';
         file_put_contents($destination, implode("\n\n", $create));
 
-        try {
-            Installer::install($schemaName);
-        } catch (Exception $e) {
-            CommandLine::warning($e->getMessage());
-            $truncate = CommandLine::input('Try repopulating the database?(n):', 'n');
-
-            if($truncate !== 'n') {
-                $this->trigger('faucet-flush-sql', $request, $response);
-                Installer::install($schemaName);
-                $this->trigger('faucet-populate-sql', $request, $response);
-            }
-        }
-
         CommandLine::info(sprintf($message, $data['name'], implode("\n\n", $queries)));
     }
 
     CommandLine::success('SQL files were generated.');
+    CommandLine::info('Recommended actions:');
+    CommandLine::info(' - bin/cradle faucet update');
+    CommandLine::info(' - bin/cradle faucet build-sql');
+    CommandLine::info(' - bin/cradle faucet flush-sql');
+    CommandLine::info(' - bin/cradle faucet populate-sql');
 };

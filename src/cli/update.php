@@ -17,10 +17,14 @@ use Cradle\Sink\Faucet\Installer;
  * @param Response $response
  */
 return function ($request, $response) {
-    //setup the configs
     CommandLine::system('Updating project...');
 
-    $versions = Installer::install();
+    $module = null;
+    if($request->hasStage('module')) {
+        $module = $request->hasStage('module');
+    }
+
+    $versions = Installer::install($module);
 
     foreach($versions as $path => $version) {
         CommandLine::success('Updated ' . $path . ' to v' . $version);

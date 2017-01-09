@@ -26,6 +26,8 @@ return function ($request, $response) {
     echo PHP_EOL;
 
     CommandLine::success('bin/cradle faucet update');
+    CommandLine::info(' - Example: bin/cradle faucet update');
+    CommandLine::info(' - Example: bin/cradle faucet update --module post');
     CommandLine::info(' - Details: Updates Project with versioning install scripts');
     echo PHP_EOL;
 
@@ -38,18 +40,39 @@ return function ($request, $response) {
     echo PHP_EOL;
 
     CommandLine::success('bin/cradle faucet generate-module');
+    CommandLine::info(' - Example: bin/cradle faucet generate-module');
+    CommandLine::info(' - Example: bin/cradle faucet generate-module --schema post');
     CommandLine::info(' - Details: Generates a new module given schema');
     echo PHP_EOL;
 
-    CommandLine::success('bin/cradle faucet generate-view');
-    CommandLine::info(' - Details: Generates a new view given schema');
+    CommandLine::success('bin/cradle faucet generate-admin');
+    CommandLine::info(' - Example: bin/cradle faucet generate-admin');
+    CommandLine::info(' - Example: bin/cradle faucet generate-admin --schema post');
+    CommandLine::info(' - Details: Generates a new admin controller given schema');
+    echo PHP_EOL;
+
+    CommandLine::success('bin/cradle faucet generate-rest');
+    CommandLine::info(' - Example: bin/cradle faucet generate-rest');
+    CommandLine::info(' - Example: bin/cradle faucet generate-rest --schema post');
+    CommandLine::info(' - Details: Generates a new REST controller given schema');
     echo PHP_EOL;
 
     CommandLine::success('bin/cradle faucet generate-sql');
+    CommandLine::info(' - Example: bin/cradle faucet generate-sql');
+    CommandLine::info(' - Example: bin/cradle faucet generate-sql --schema post');
     CommandLine::info(' - Details: Generates SQL given schema');
     echo PHP_EOL;
 
+    CommandLine::success('bin/cradle faucet generate-elastic');
+    CommandLine::info(' - Example: bin/cradle faucet generate-elastic');
+    CommandLine::info(' - Example: bin/cradle faucet generate-elastic --schema post');
+    CommandLine::info(' - Details: Generates ElasticSearch map given schema');
+    echo PHP_EOL;
+
     CommandLine::success('bin/cradle faucet flush-sql');
+    CommandLine::info(' - Example: bin/cradle faucet flush-sql');
+    CommandLine::info(' - Example: bin/cradle faucet flush-sql --table post');
+    CommandLine::info(' - Example: bin/cradle faucet flush-sql --tableset post');
     CommandLine::info(' - Details: Clears SQL database');
     echo PHP_EOL;
 
