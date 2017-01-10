@@ -228,5 +228,39 @@ return function($request, $response) {
         file_put_contents($bootstrapFile, $contents);
     }
 
+    //add to phpunit.xml
+    $phpunitFile = $cwd . '/phpunit.xml';
+    if(file_exists($phpunitFile)) {
+        $flag = '</testsuites>';
+        $add = "\t".'<testsuite name="'. ucwords($active) .' Test Suite">';
+        
+        if(empty($init)) {
+            $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/ValidatorTest.php</file>';
+            $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/ServiceTest.php</file>';
+            $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/Service/SqlServiceTest.php</file>';
+            $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/Service/ElasticServiceTest.php</file>';
+            $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/EventTest.php</file>';
+        } else {
+            foreach ($init as $item) {
+                $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/'. $item['capital'] .'/ValidatorTest.php</file>';
+                $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/'. $item['capital'] .'/ServiceTest.php</file>';
+                $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/'. $item['capital'] .'/Service/SqlServiceTest.php</file>';
+                $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/'. $item['capital'] .'/Service/ElasticServiceTest.php</file>';
+                $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/'. $item['capital'] .'/EventTest.php</file>';
+            }    
+        }
+
+        $add .= PHP_EOL."\t\t".'</testsuite>';
+
+        $contents = file_get_contents($phpunitFile);
+
+        if(strpos($contents, $flag) !== false && strpos($contents, $add) === false) {
+            $contents = str_replace($flag, $add. "\n\t" .$flag, $contents);
+        }
+
+        CommandLine::info('Updating ' . $phpunitFile);
+        file_put_contents($phpunitFile, $contents);
+    }
+
     CommandLine::success($active . ' module was generated. Run `composer update`.');
 };
