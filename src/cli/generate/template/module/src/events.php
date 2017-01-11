@@ -10,9 +10,6 @@
 use Cradle\Module\{{namespace}}\Service as {{camel name 1}}Service;
 use Cradle\Module\{{namespace}}\Validator as {{camel name 1}}Validator;
 
-use Cradle\Http\Request;
-use Cradle\Http\Response;
-
 {{~#if has_file}}
 
 use Cradle\Module\Utility\File;
@@ -252,11 +249,14 @@ $cradle->on('{{name}}-detail', function ($request, $response) {
         return $response->setError(true, 'Not Found');
     }
 
+    {{~#each relations}}{{#when @key '===' 'profile'}}
+
     //if permission is provided
     $permission = $request->getStage('permission');
     if ($permission && $results['profile_id'] != $permission) {
         return $response->setError(true, 'Invalid Permissions');
     }
+    {{~/when}}{{/each}}
 
     $response->setError(false)->setResults($results);
 });

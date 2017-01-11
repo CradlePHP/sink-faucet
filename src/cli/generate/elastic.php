@@ -82,6 +82,28 @@ return function($request, $response) {
         //get the template data
         $data = (new Schema($schemaRoot, $schema))->getData();
 
+        if(isset($data['primary'])) {
+            $map[$data['name']][$data['primary']] = ['type' => 'integer'];
+        }
+
+        if(isset($data['active'])) {
+            $map[$data['name']][$data['active']] = ['type' => 'short'];
+        }
+
+        if(isset($data['created'])) {
+            $map[$data['name']][$data['created']] = [
+                'type' => 'date',
+                'format' => 'yyyy-MM-dd HH:mm:ss'
+            ];
+        }
+
+        if(isset($data['updated'])) {
+            $map[$data['name']][$data['updated']] = [
+                'type' => 'date',
+                'format' => 'yyyy-MM-dd HH:mm:ss'
+            ];
+        }
+
         foreach($data['fields'] as $name => $field) {
             if(isset($field['elastic'])) {
                 $map[$data['name']][$name] = $field['elastic'];

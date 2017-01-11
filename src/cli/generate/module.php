@@ -233,7 +233,7 @@ return function($request, $response) {
     if(file_exists($phpunitFile)) {
         $flag = '</testsuites>';
         $add = "\t".'<testsuite name="'. ucwords($active) .' Test Suite">';
-        
+
         if(empty($init)) {
             $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/ValidatorTest.php</file>';
             $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/ServiceTest.php</file>';
@@ -247,7 +247,7 @@ return function($request, $response) {
                 $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/'. $item['capital'] .'/Service/SqlServiceTest.php</file>';
                 $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/'. $item['capital'] .'/Service/ElasticServiceTest.php</file>';
                 $add .= PHP_EOL."\t\t\t".'<file>module/'. $active .'/test/'. $item['capital'] .'/EventTest.php</file>';
-            }    
+            }
         }
 
         $add .= PHP_EOL."\t\t".'</testsuite>';
@@ -262,5 +262,5 @@ return function($request, $response) {
         file_put_contents($phpunitFile, $contents);
     }
 
-    CommandLine::success($active . ' module was generated. Run `composer update`.');
+    CommandLine::success($active . ' module was generated. Run `composer dump-autoload`.');
 };
