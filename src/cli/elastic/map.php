@@ -41,7 +41,11 @@ return function ($request, $response) {
         $tables[$i] = $table[0];
     }
 
+    //this is a flat column schema reference
     $meta = [];
+
+    //this has the final schema per table
+    $maps = [];
 
     //in this iteration we will form the meta
     foreach ($tables as $table) {
@@ -133,6 +137,7 @@ return function ($request, $response) {
         $fileMap = include $elastic;
 
         foreach($fileMap as $name => $fields) {
+            $maps[$name] = $fields;
             foreach($fields as $name => $map) {
                 $meta[$name] = $map;
             }
@@ -140,6 +145,7 @@ return function ($request, $response) {
     }
 
     //in this iteration we will get the first data
+    //and contribute to the map
     foreach ($tables as $table) {
         $sql = ServiceFactory::get($table, 'sql');
 
@@ -154,28 +160,38 @@ return function ($request, $response) {
             continue;
         }
 
-        $map = [];
         foreach ($results['rows'][0] as $column => $value) {
             //if is object
             if (is_array($value) && !isset($meta[$column])) {
-                $meta[$column]['type'] = 'object';
+                if(strpos(json_encode($value), '[{') === 0) {
+                    $meta[$column]['type'] = 'nested';
+                } else if(is_numeric(key($value))) {
+                    $meta[$column]['type'] = 'string';
+                } else {
+                    $meta[$column]['type'] = 'object';
+                }
             }
 
             //if it's not found in the meta
-            if (!isset($meta[$column])) {
+            if (isset($maps[$table][$column]) || !isset($meta[$column])) {
                 //we cant auto map this
                 continue;
             }
 
-            $map[$column] = $meta[$column];
+            $maps[$table][$column] = $meta[$column];
         }
+    }
 
-        if ($request->hasStage('o')) {
+    foreach($maps as $table => $map) {
+        if ($request->hasStage('v')) {
             echo json_encode([
-                'mappings' => [
-                    'main' => [
-                        'properties' => $map
-                    ]
+                'index' => $table,
+                'type' => 'main',
+                'body' => [
+                    '_source' => [
+                        'enabled' => true
+                    ],
+                    'properties' => $map
                 ]
             ], JSON_PRETTY_PRINT);
         }
