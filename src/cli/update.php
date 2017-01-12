@@ -21,7 +21,7 @@ return function ($request, $response) {
 
     $module = null;
     if($request->hasStage('module')) {
-        $module = $request->hasStage('module');
+        $module = $request->getStage('module');
     }
 
     $versions = Installer::install($module);

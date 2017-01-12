@@ -33,10 +33,11 @@ return function ($request, $response) {
     }
 
     //get the queue name
-    $settings = $this->package('global')->config('settings');
     $name = 'queue';
-    if (isset($settings['queue']) && trim($settings['queue'])) {
-        $name = $settings['queue'];
+    if($request->hasStage(0)) {
+        $name = $request->getStage(0);
+    } else if($request->hasStage('name')) {
+        $name = $request->getStage('name');
     }
 
     // notify its up
