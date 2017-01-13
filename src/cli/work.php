@@ -10,6 +10,10 @@
 use Cradle\CommandLine\Index as CommandLine;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 
+if (!defined('WORKER_ID')) {
+    define('WORKER_ID', md5(uniqid()));
+}
+
 /**
  * CLI starts worker
  *
@@ -22,9 +26,11 @@ return function ($request, $response) {
     //get the channel
     if (is_null($channel)) {
         //add a logger
-        $this->addLogger(function ($message) {
-            echo '[cradle] ' . $message . PHP_EOL;
-        });
+        if($request->hasStage('v')) {
+            $this->addLogger(function ($message) {
+                echo '[cradle] ' . $message . PHP_EOL;
+            });
+        }
 
         $channel = $this
             ->package('global')
@@ -72,21 +78,20 @@ return function ($request, $response) {
             //start
             $this->log($task . ' is running');
 
-            $request->setStage($data);
+            $command = sprintf(
+                '%s/bin/cradle %s%s --__worker_id=%s --__json=\'%s\'',
+                $request->getServer('PWD'),
+                $task,
+                $request->hasStage('v') ? ' -v': '',
+                WORKER_ID,
+                str_replace("'", "\\'", json_encode($data))
+            );
 
-            $this->triggerEvent($task, $request, $response);
+            system($command, $result);
 
-            //if there was an error
-            if ($response->get('json', 'error')) {
-                $error = $response->getDot('json.message');
-
+            if($result) {
                 $this->log('Task is not done.');
-                $this->log($error);
                 $this->log(json_encode($data));
-
-                //an exception didn't trigger
-                //it just refused to do it
-                //so why try it again ?
             } else {
                 $this->log($task . ' was performed');
                 $this->log(json_encode($data));

@@ -179,6 +179,13 @@ $cradle->get('/admin/{{name}}/update/:{{primary}}', function($request, $response
     // 2. Prepare Data
     $data = ['item' => $request->getPost()];
 
+    {{~#if has_file}}
+
+    //add CDN
+    $config = $this->package('global')->service('s3-main');
+    $data['cdn_config'] = File::getS3Client($config);
+    {{~/if}}
+
     //if no item
     if(empty($data['item'])) {
         cradle()->trigger('{{name}}-detail', $request, $response);
