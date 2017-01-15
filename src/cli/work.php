@@ -87,9 +87,12 @@ return function ($request, $response) {
                 str_replace("'", "\\'", json_encode($data))
             );
 
+            $this->log('Converting to the following command:');
+            $this->log($command);
+
             system($command, $result);
 
-            if($result) {
+            if(!$result) {
                 $this->log('Task is not done.');
                 $this->log(json_encode($data));
             } else {
