@@ -16,6 +16,7 @@ use Cradle\CommandLine\Index as CommandLine;
  * @param Response $response
  */
 return function ($request, $response) {
+    $cwd = $request->getServer('PWD');
     $deploy = cradle('global')->config('deploy');
 
     if (empty($deploy)) {
@@ -23,6 +24,7 @@ return function ($request, $response) {
         return;
     }
 
+    $deployable = [];
     $deployConfig = [];
     foreach ($deploy['servers'] as $name => $server) {
         if (isset($server['deploy'])) {
@@ -33,26 +35,39 @@ return function ($request, $response) {
             unset($server['deploy']);
         }
 
-        $command = 'ssh -i /tmp/travis_rsa %s@%s -o "StrictHostKeyChecking no" exit';
-        exec(sprintf($command, $server['user'], $server['host']));
+        $command = 'ssh -i %s %s@%s -o "StrictHostKeyChecking no" exit';
+        exec(sprintf($command, $deploy['key'], $server['user'], $server['host']));
 
         $deployConfig[] = '[' . $name . ']';
+        $deployConfig[] = 'key ' . $deploy['key'];
         foreach ($server as $key => $value) {
             $deployConfig[] = $key . ' ' . $value;
         }
 
         //make it readable
         $deployConfig[] = '';
+
+        $deployable[] = $name;
+    }
+
+    if(empty($deployConfig)) {
+        CommandLine::error('Nothing to Deploy. Aborting.');
+        return;
     }
 
     //write to tmp
     file_put_contents('/tmp/deploy.conf', implode("\n", $deployConfig));
 
-    //run the deploys
-    foreach ($deploy['servers'] as $name => $server) {
-        exec('./deploy -c /tmp/deploy.conf ' . $name);
-    }
+    //deploy
+    foreach($deployable as $name) {
+        $command = sprintf(
+            '%s/deploy -C %s -c /tmp/deploy.conf %s',
+            __DIR__,
+            $cwd,
+            $name
+        );
 
-    exec('composer update');
-    exec('composer install');
+        CommandLine::system($command);
+        system($command);
+    }
 };
