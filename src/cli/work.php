@@ -79,7 +79,7 @@ return function ($request, $response) {
             $this->log($task . ' is running');
 
             $command = sprintf(
-                '%s/bin/cradle %s%s --__worker_id=%s --__json=\'%s\'',
+                'cd %s && bin/cradle %s%s --__worker_id=%s --__json=\'%s\'',
                 $request->getServer('PWD'),
                 $task,
                 $request->hasStage('v') ? ' -v': '',
