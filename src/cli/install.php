@@ -98,7 +98,7 @@ return function ($request, $response) {
             $destination = $cwd . '/config/' . $path;
 
             if (file_exists($destination) && !$force) {
-                $answer = CommandLine::input('Overwrite config/' . $config . '.php?(y)', 'y');
+                $answer = CommandLine::input('Overwrite config/' . $path . '?(y)', 'y');
                 if ($answer !== 'y') {
                     CommandLine::system('Skipping...');
                     continue;
