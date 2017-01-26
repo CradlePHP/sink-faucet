@@ -5,7 +5,6 @@ $createPlaceholderQueries = function($data, $database) {
         return [];
     }
 
-    $found = false;
     $queries = [];
     $columns = [];
 
@@ -31,16 +30,16 @@ $createPlaceholderQueries = function($data, $database) {
         }
     }
 
-    $query = $database->getInsertQuery($data['name']);
     foreach($data['fixtures'] as $i => $row) {
+        $found = false;
+        $query = $database->getInsertQuery($data['name']);
+
         foreach($row as $key => $value) {
             //if it's not in the sql columns
             if(!in_array($key, $columns)) {
                 //skip it
                 continue;
             }
-
-            $found = true;
 
             if(is_string($value)) {
                 $value = "'" . addslashes($value) . "'";
@@ -50,12 +49,13 @@ $createPlaceholderQueries = function($data, $database) {
                 $value = json_encode($value);
             }
 
+            $found = true;
             $query->set($key, $value, $i);
         }
-    }
 
-    if($found) {
-        $queries[] = (string) $query;
+        if($found) {
+            $queries[] = (string) $query;
+        }
     }
 
     if(!isset($data['relations'])) {

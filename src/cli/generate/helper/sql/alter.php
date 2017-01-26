@@ -53,7 +53,7 @@ $createAlterQueries = function($data, $database) {
         }
 
         $attributes['null'] = true;
-        if(isset($field['sql']['default']) && trim($field['sql']['default'])) {
+        if(isset($field['sql']['default']) && strlen($field['sql']['default'])) {
             $attributes['default'] = $field['sql']['default'];
         } else if(!isset($field['sql']['required']) || !$field['sql']['required']) {
             $attributes['null'] = true;
@@ -95,7 +95,7 @@ $createAlterQueries = function($data, $database) {
             $attributes['type'] .= '(' . $field['sql']['length'] . ')';
         }
 
-        if(isset($field['sql']['default']) && trim($field['sql']['default'])) {
+        if(isset($field['sql']['default']) && strlen($field['sql']['default'])) {
             $attributes['default'] = $field['sql']['default'];
         } else if(!isset($field['sql']['required']) || !$field['sql']['required']) {
             $attributes['null'] = true;
