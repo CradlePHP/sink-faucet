@@ -35,6 +35,7 @@ return function ($request, $response) {
         $elastic = ServiceFactory::get($object, 'elastic');
 
         $i = 0;
+        $working = false;
         do {
             CommandLine::info('  - Indexing ' . $object . ': ' . $i . '-' . ($i + 100));
 
@@ -54,10 +55,17 @@ return function ($request, $response) {
                 }
 
                 if ($elastic->create($row[$primary]) === false) {
-                    //because there is no reason to continue;
-                    CommandLine::warning('No index server found. Aborting...');
-                    return;
+                    if(!$working) {
+                        //because there is no reason to continue;
+                        CommandLine::warning('No index server found. Aborting...');
+                        return;
+                    }
+
+                    CommandLine::warning($row[$primary] . ' failed to insert. Skipping...');
+                    continue;
                 }
+
+                $working = true;
             }
 
             $i += 100;
