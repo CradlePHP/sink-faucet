@@ -232,7 +232,6 @@ class SqlService extends AbstractSqlService implements SqlServiceInterface
             }
             {{/each~}}
             {{/if}}
-            $rows[$i] = $results;
         }
 
         //return response format
