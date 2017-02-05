@@ -445,12 +445,14 @@ class Schema
                     'words',
                     'link',
                     'image',
+                    'images',
                     'email',
                     'phone',
                     'capital',
                     'implode',
                     'upper',
                     'lower',
+                    'price',
                     'noop',
                     'inline'
                 ]
