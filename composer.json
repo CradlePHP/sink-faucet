@@ -17,7 +17,6 @@
         }
     ],
     "require": {
-        "php": ">=5.6.0",
         "cradlephp/command-line": "dev-master"
     },
     "autoload": {
