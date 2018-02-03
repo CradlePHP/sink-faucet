@@ -278,7 +278,38 @@ class SqlService extends AbstractSqlService implements SqlServiceInterface
     {{/if}}
 
     {{~#each relations}}
+        {{~#when name '===' ../name}}
+    /**
+     * Links {{name}}
+     *
+     * @param *int ${{../name}}Primary
+     * @param *int ${{name}}Primary
+     */
+    public function link{{camel name 1}}(${{../name}}Primary1, ${{name}}Primary2)
+    {
+        return $this->resource
+            ->model()
+            ->set{{camel ../primary 1}}1(${{../name}}Primary1)
+            ->set{{camel primary 1}}2(${{name}}Primary2)
+            ->insert('{{../name}}_{{name}}');
+    }
 
+    /**
+     * Unlinks {{name}}
+     *
+     * @param *int ${{../name}}Primary
+     * @param *int ${{name}}Primary
+     */
+    public function unlink{{capital name 1}}(${{../name}}Primary1, ${{name}}Primary2)
+    {
+        return $this->resource
+            ->model()
+            ->set{{camel ../primary 1}}1(${{../name}}Primary)
+            ->set{{camel primary 1}}2(${{name}}Primary)
+            ->remove('{{../name}}_{{name}}');
+    }
+
+        {{~else}}
     /**
      * Links {{name}}
      *
@@ -308,14 +339,16 @@ class SqlService extends AbstractSqlService implements SqlServiceInterface
             ->set{{camel primary 1}}(${{name}}Primary)
             ->remove('{{../name}}_{{name}}');
     }
+
+        {{~/when}}
         {{~#if many}}
 
     /**
-     * Unlinks All {{name}}
-     *
-     * @param *int ${{../name}}Primary
-     * @param *int ${{name}}Primary
-     */
+    * Unlinks All {{name}}
+    *
+    * @param *int ${{../name}}Primary
+    * @param *int ${{name}}Primary
+    */
     public function unlinkAll{{camel name 1}}(${{../name}}Primary)
     {
         return $this->resource

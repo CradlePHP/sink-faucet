@@ -58,6 +58,13 @@ return function ($request, $response) {
         }
 
         $query = file_get_contents($file);
-        $this->package('global')->service('sql-main')->query($query);
+
+        CommandLine::info('Building ' . $folder);
+
+        try {
+            $database->query($query);
+        } catch(SqlException $e) {
+            CommandLine::error($e->getMessage());
+        }
     }
 };

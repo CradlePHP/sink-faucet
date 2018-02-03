@@ -1,0 +1,14 @@
+
+                    <div
+                        data-do="file-field"
+                        data-name="{NAME}"
+                    >
+                        {{#if item.{NAME}}}
+                            <h5>Current Files</h5>
+                            {{#each item.{NAME}}}
+                            <div class="file">
+                                <a href="{{this}}" target="_blank">{{this}}</a>
+                            </div>
+                            {{/each}}
+                        {{/if}}
+                    </div>

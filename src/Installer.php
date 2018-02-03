@@ -10,6 +10,8 @@
 namespace Cradle\Sink\Faucet;
 
 use Closure;
+use Cradle\Sql\SqlFactory;
+use Cradle\CommandLine\Index as CommandLine;
 
 /**
  * Installer
@@ -183,12 +185,16 @@ class Installer
             $current[$module] = '0.0.0';
         }
 
+        $database = SqlFactory::load(cradle('global')->service('sql-main'));
+
         //now run the scripts in order of version
         foreach ($versions as $version => $files) {
             //if 0.0.0 >= 0.0.1
             if (version_compare($current[$module], $version, '>=')) {
                 continue;
             }
+
+            CommandLine::info('Updating to ' . $module .' -> ' . $version);
 
             //run the scripts
             foreach ($files as $file) {
@@ -198,9 +204,7 @@ class Installer
                         break;
                     case 'sql':
                         $query = file_get_contents($file['script']);
-                        cradle('global')
-                            ->service('sql-main')
-                            ->query($query);
+                        $database->query($query);
                         break;
                     case 'sh':
                         exec($file['script']);

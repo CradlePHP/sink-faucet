@@ -71,6 +71,34 @@ $cradle->on('{{name}}-create', function ($request, $response) {
     }
         {{~/when}}
 
+        {{~#when form.inline_type '===' 'file-field'}}
+
+    //if there is an image
+    if (isset($data['{{@key}}'])) {
+        //upload files
+        //try cdn if enabled
+        $config = $this->package('global')->service('s3-main');
+        $data['{{@key}}'] = File::base64ToS3($data['{{@key}}'], $config);
+        //try being old school
+        $upload = $this->package('global')->path('upload');
+        $data['{{@key}}'] = File::base64ToUpload($data['{{@key}}'], $upload);
+    }
+        {{~/when}}
+
+        {{~#when form.inline_type '===' 'files-field'}}
+
+    //if there is an image
+    if (isset($data['{{@key}}'])) {
+        //upload files
+        //try cdn if enabled
+        $config = $this->package('global')->service('s3-main');
+        $data['{{@key}}'] = File::base64ToS3($data['{{@key}}'], $config);
+        //try being old school
+        $upload = $this->package('global')->path('upload');
+        $data['{{@key}}'] = File::base64ToUpload($data['{{@key}}'], $upload);
+    }
+        {{~/when}}
+
         {{~#when sql.encoding '===' 'json'}}
 
     if(isset($data['{{@key}}'])) {
@@ -488,6 +516,48 @@ $cradle->on('{{name}}-update', function ($request, $response) {
     }
         {{~/when}}
 
+        {{~#when form.inline_type '===' 'images-field'}}
+
+    //if there is an image
+    if (isset($data['{{@key}}'])) {
+        //upload files
+        //try cdn if enabled
+        $config = $this->package('global')->service('s3-main');
+        $data['{{@key}}'] = File::base64ToS3($data['{{@key}}'], $config);
+        //try being old school
+        $upload = $this->package('global')->path('upload');
+        $data['{{@key}}'] = File::base64ToUpload($data['{{@key}}'], $upload);
+    }
+        {{~/when}}
+
+        {{~#when form.inline_type '===' 'file-field'}}
+
+    //if there is an image
+    if (isset($data['{{@key}}'])) {
+        //upload files
+        //try cdn if enabled
+        $config = $this->package('global')->service('s3-main');
+        $data['{{@key}}'] = File::base64ToS3($data['{{@key}}'], $config);
+        //try being old school
+        $upload = $this->package('global')->path('upload');
+        $data['{{@key}}'] = File::base64ToUpload($data['{{@key}}'], $upload);
+    }
+        {{~/when}}
+
+        {{~#when form.inline_type '===' 'files-field'}}
+
+    //if there is an image
+    if (isset($data['{{@key}}'])) {
+        //upload files
+        //try cdn if enabled
+        $config = $this->package('global')->service('s3-main');
+        $data['{{@key}}'] = File::base64ToS3($data['{{@key}}'], $config);
+        //try being old school
+        $upload = $this->package('global')->path('upload');
+        $data['{{@key}}'] = File::base64ToUpload($data['{{@key}}'], $upload);
+    }
+        {{~/when}}
+
         {{~#when sql.encoding '===' 'json'}}
 
     if(isset($data['{{@key}}'])) {
@@ -580,3 +650,219 @@ $cradle->on('{{name}}-update', function ($request, $response) {
     //return response format
     $response->setError(false)->setResults($results);
 });
+
+{{~#each relations}}
+    {{~#when name '===' ../name}}
+
+/**
+ * Links {{../singular}} to {{name}}
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$cradle->on('{{../name}}-link-{{name}}', function ($request, $response) {
+    //----------------------------//
+    // 1. Get Data
+    $data = [];
+    if ($request->hasStage()) {
+        $data = $request->getStage();
+    }
+
+    //----------------------------//
+    // 2. Validate Data
+    if (!isset($data['{{../primary}}_1'], $data['{{primary}}_2'])) {
+        return $response->setError(true, 'No ID provided');
+    }
+
+    //----------------------------//
+    // 3. Process Data
+    //this/these will be used a lot
+    ${{../name}}Sql = {{camel ../name 1}}Service::get('sql');
+    ${{../name}}Redis = {{camel ../name 1}}Service::get('redis');
+    ${{../name}}Elastic = {{camel ../name 1}}Service::get('elastic');
+
+    $results = ${{../name}}Sql->link{{camel name 1}}(
+        $data['{{../primary}}_1'],
+        $data['{{primary}}_2']
+    );
+
+    //index post
+    ${{../name}}Elastic->update($data['{{../primary}}_1']);
+
+    //invalidate cache
+    ${{../name}}Redis->removeSearch();
+
+    //return response format
+    $response->setError(false)->setResults($results);
+});
+
+/**
+ * Unlinks {{../singular}} from {{name}}
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$cradle->on('{{../name}}-unlink-{{name}}', function ($request, $response) {
+    //----------------------------//
+    // 1. Get Data
+    $data = [];
+    if ($request->hasStage()) {
+        $data = $request->getStage();
+    }
+
+    //----------------------------//
+    // 2. Validate Data
+    if (!isset($data['{{../primary}}_1'], $data['{{primary}}_2'])) {
+        return $response->setError(true, 'No ID provided');
+    }
+
+    //----------------------------//
+    // 3. Process Data
+    //this/these will be used a lot
+    ${{../name}}Sql = {{camel ../name 1}}Service::get('sql');
+    ${{../name}}Redis = {{camel ../name 1}}Service::get('redis');
+    ${{../name}}Elastic = {{camel ../name 1}}Service::get('elastic');
+
+    $results = ${{../name}}Sql->unlink{{camel name 1}}(
+        $data['{{../primary}}_1'],
+        $data['{{primary}}_2']
+    );
+
+    //index post
+    ${{../name}}Elastic->update($data['{{../primary}}_1']);
+
+    //invalidate cache
+    ${{../name}}Redis->removeSearch();
+
+    //return response format
+    $response->setError(false)->setResults($results);
+});
+
+    {{~else}}
+
+/**
+ * Links {{../singular}} to {{name}}
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$cradle->on('{{../name}}-link-{{name}}', function ($request, $response) {
+    //----------------------------//
+    // 1. Get Data
+    $data = [];
+    if ($request->hasStage()) {
+        $data = $request->getStage();
+    }
+
+    //----------------------------//
+    // 2. Validate Data
+    if (!isset($data['{{../primary}}'], $data['{{primary}}'])) {
+        return $response->setError(true, 'No ID provided');
+    }
+
+    //----------------------------//
+    // 3. Process Data
+    //this/these will be used a lot
+    ${{../name}}Sql = {{camel ../name 1}}Service::get('sql');
+    ${{../name}}Redis = {{camel ../name 1}}Service::get('redis');
+    ${{../name}}Elastic = {{camel ../name 1}}Service::get('elastic');
+
+    $results = ${{../name}}Sql->link{{camel name 1}}(
+        $data['{{../primary}}'],
+        $data['{{primary}}']
+    );
+
+    //index post
+    ${{../name}}Elastic->update($data['{{../primary}}']);
+
+    //invalidate cache
+    ${{../name}}Redis->removeSearch();
+
+    //return response format
+    $response->setError(false)->setResults($results);
+});
+
+/**
+ * Unlinks {{../singular}} from {{name}}
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$cradle->on('{{../name}}-unlink-{{name}}', function ($request, $response) {
+    //----------------------------//
+    // 1. Get Data
+    $data = [];
+    if ($request->hasStage()) {
+        $data = $request->getStage();
+    }
+
+    //----------------------------//
+    // 2. Validate Data
+    if (!isset($data['{{../primary}}'], $data['{{primary}}'])) {
+        return $response->setError(true, 'No ID provided');
+    }
+
+    //----------------------------//
+    // 3. Process Data
+    //this/these will be used a lot
+    ${{../name}}Sql = {{camel ../name 1}}Service::get('sql');
+    ${{../name}}Redis = {{camel ../name 1}}Service::get('redis');
+    ${{../name}}Elastic = {{camel ../name 1}}Service::get('elastic');
+
+    $results = ${{../name}}Sql->unlink{{camel name 1}}(
+        $data['{{../primary}}'],
+        $data['{{primary}}']
+    );
+
+    //index post
+    ${{../name}}Elastic->update($data['{{../primary}}']);
+
+    //invalidate cache
+    ${{../name}}Redis->removeSearch();
+
+    //return response format
+    $response->setError(false)->setResults($results);
+});
+    {{~/when}}
+    {{~#if many}}
+
+/**
+ * Unlinks all {{../singular}} from {{name}}
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$cradle->on('{{../name}}-unlinkall-{{name}}', function ($request, $response) {
+    //----------------------------//
+    // 1. Get Data
+    $data = [];
+    if ($request->hasStage()) {
+        $data = $request->getStage();
+    }
+
+    //----------------------------//
+    // 2. Validate Data
+    if (!isset($data['{{../primary}}'])) {
+        return $response->setError(true, 'No ID provided');
+    }
+
+    //----------------------------//
+    // 3. Process Data
+    //this/these will be used a lot
+    ${{../name}}Sql = {{camel ../name 1}}Service::get('sql');
+    ${{../name}}Redis = {{camel ../name 1}}Service::get('redis');
+    ${{../name}}Elastic = {{camel ../name 1}}Service::get('elastic');
+
+    $results = ${{../name}}Sql->unlinkAll{{camel name 1}}($data['{{../primary}}']);
+
+    //index post
+    ${{../name}}Elastic->update($data['{{../primary}}']);
+
+    //invalidate cache
+    ${{../name}}Redis->removeSearch();
+
+    //return response format
+    $response->setError(false)->setResults($results);
+});
+    {{~/if~}}
+{{/each}}

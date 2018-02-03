@@ -9,6 +9,7 @@
 
 use Cradle\CommandLine\Index as CommandLine;
 use Cradle\Sql\SqlFactory;
+use Cradle\Sql\SqlException;
 
 /**
  * CLI populates database with dummy data
@@ -21,6 +22,8 @@ return function ($request, $response) {
 
     $path = $this->package('global')->path('module');
     $folders = scandir($path, 0);
+
+    $database = SqlFactory::load($this->package('global')->service('sql-main'));
 
     foreach ($folders as $folder) {
         if ($folder === '.' || $folder === '..' || !is_dir($path . '/' . $folder)) {
@@ -39,6 +42,13 @@ return function ($request, $response) {
         }
 
         $query = file_get_contents($file);
-        $this->package('global')->service('sql-main')->query($query);
+
+        CommandLine::info('Populating ' . $folder);
+
+        try {
+            $database->query($query);
+        } catch(SqlException $e) {
+            CommandLine::error($e->getMessage());
+        }
     }
 };

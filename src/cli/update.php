@@ -9,6 +9,7 @@
 
 use Cradle\CommandLine\Index as CommandLine;
 use Cradle\Sink\Faucet\Installer;
+use Cradle\Sql\SqlException;
 
 /**
  * CLI faucet update
@@ -24,7 +25,16 @@ return function ($request, $response) {
         $module = $request->getStage('module');
     }
 
-    $versions = Installer::install($module);
+    try {
+        $versions = Installer::install($module);
+    } catch(SqlException $e) {
+        CommandLine::error($e->getMessage());
+    } catch(Exception $e) {
+        CommandLine::error($e->getMessage());
+    } catch(Throwable $e) {
+        CommandLine::error($e->getMessage());
+    }
+
 
     foreach($versions as $path => $version) {
         CommandLine::success('Updated ' . $path . ' to v' . $version);

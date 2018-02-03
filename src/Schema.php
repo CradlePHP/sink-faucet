@@ -178,7 +178,7 @@ class Schema
         $this->scehma = $this->root . '/' . $name . '.php';
     }
 
-    public function getData()
+    public function getData($children = true)
     {
         if(!file_exists($this->scehma)) {
             return false;
@@ -198,7 +198,10 @@ class Schema
             $this->addFlags($data['fields'][$name], $data);
         }
 
-        if(!isset($data['relations']) || !is_array($data['relations'])) {
+        if(!isset($data['relations'])
+            || !is_array($data['relations'])
+            || !$children
+        ) {
             $data['relations'] = [];
         }
 
@@ -210,11 +213,11 @@ class Schema
             }
 
             //prevent recursion loop
-            if($this->scehma === $this->root . '/' . $name . '.php') {
+            if($this->scehma === ($this->root . '/' . $name . '.php')) {
                 $schema = $data;
             } else {
                 $schema = new self($this->root, $name);
-                $schema = $schema->getData();
+                $schema = $schema->getData(false);
             }
 
             if(!$schema) {
@@ -393,6 +396,24 @@ class Schema
             //images
             if($field['form']['type'] === 'images-field') {
                 $code = file_get_contents(__DIR__ . '/cli/generate/template/fields/images.html');
+                $code = str_replace('{NAME}', $field['name'], $code);
+                $field['form']['inline_type'] = $field['form']['type'];
+                $field['form']['type'] = 'inline';
+                $field['form']['code'] = trim($code);
+            }
+
+            //file
+            if($field['form']['type'] === 'file-field') {
+                $code = file_get_contents(__DIR__ . '/cli/generate/template/fields/file.html');
+                $code = str_replace('{NAME}', $field['name'], $code);
+                $field['form']['inline_type'] = $field['form']['type'];
+                $field['form']['type'] = 'inline';
+                $field['form']['code'] = trim($code);
+            }
+
+            //files
+            if($field['form']['type'] === 'files-field') {
+                $code = file_get_contents(__DIR__ . '/cli/generate/template/fields/files.html');
                 $code = str_replace('{NAME}', $field['name'], $code);
                 $field['form']['inline_type'] = $field['form']['type'];
                 $field['form']['type'] = 'inline';
