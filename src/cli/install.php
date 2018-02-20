@@ -159,7 +159,7 @@ return function ($request, $response) {
     }
 
     CommandLine::info('Recommended actions:');
-    CommandLine::info(' - bower install');
+    CommandLine::info(' - yarn build');
     CommandLine::info(' - bin/cradle faucet populate-sql');
     CommandLine::info(' - bin/cradle faucet flush-elastic');
     CommandLine::info(' - bin/cradle faucet map-elastic');
