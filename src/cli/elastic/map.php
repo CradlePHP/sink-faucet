@@ -120,7 +120,7 @@ return function ($request, $response) {
     }
 
     //in this iteration the elastic map found in module will override
-    $cwd = $request->getServer('PWD');
+    $cwd = getcwd();
     $paths = scandir($cwd . '/module', 0);
 
     foreach($paths as $path) {
